@@ -55,6 +55,8 @@ repo.txt
 .env.*
 
 ## Database local files (when using local SQLite during development)
+*.db
+*.sqlite
 *.db-shm
 *.db-wal
 
