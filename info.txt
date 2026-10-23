@@ -1,0 +1,30 @@
+THÔNG TIN ĐỒ ÁN VÀ TỔNG HỢP TÍNH NĂNG
+Môn học: UDQL2 2026 / Lập trình Desktop
+Sinh viên thực hiện: 23120078
+Đề tài (Số cuối MSSV = 8): Cửa hàng bán laptop hoặc phần cứng máy tính
+Tên dự án: TechGear Laptop Store
+
+============================================================
+1. CÁC TÍNH NĂNG ĐÃ HOÀN THÀNH (ĐẠT 100% TIÊU CHÍ)
+============================================================
+- Phân tích nghiệp vụ chuyên sâu theo đặc thù Cửa hàng Laptop & Linh kiện phần cứng (Quản lý CPU, RAM, GPU, SSD, bảo hành...).
+- Thiết kế Cơ sở dữ liệu chuẩn hóa, quan hệ toàn vẹn, Index SKU, Phone, OrderNumber.
+- Kiến trúc đa tầng Clean Architecture (Domain, Application, Infrastructure, Web API, Desktop Client).
+- Quản lý Sản phẩm: CRUD, tìm kiếm đa tiêu chí, phân loại theo danh mục, lọc giá, kiểm tra tồn kho.
+- Quản lý Khách hàng: CRUD, quản lý tích điểm thưởng thành viên, lưu trữ lịch sử mua sắm.
+- Lập & Quản lý Đơn hàng: Tính toán chiết khấu, kiểm tra tồn kho thời gian thực, trừ kho tự động trong Transaction, hoàn trả kho khi hủy đơn.
+- Báo cáo Doanh thu & Thống kê: Dashboard trực quan, Top sản phẩm bán chạy, cảnh báo sản phẩm sắp hết hàng.
+- Web API Server: RESTful đầy đủ, Swagger UI, Global Error Handling.
+- Bảo mật: Băm mật khẩu PBKDF2 Salted Hash, JWT Bearer Token.
+- Phân quyền theo vai trò (RBAC): 4 nhóm quyền Admin, Manager, SalesStaff, WarehouseStaff. Kiểm tra phân quyền chặt chẽ ở cả Server API và giao diện Client.
+- Dữ liệu mẫu (Demo Data): Đầy đủ 24 sản phẩm laptop/linh kiện thật, 5 danh mục, 12 khách hàng, 22 đơn hàng thực tế với nhiều trạng thái, 4 tài khoản người dùng demo.
+- Kiểm thử tự động: 12 test case xUnit (100% Pass) kiểm tra logic nghiệp vụ, biên, xác thực, phân quyền.
+- Trợ lý AI Thông minh: AI Assistant có Tool execution, kết nối CSDL thực tế và kiểm soát quyền hạn theo Role người dùng.
+
+============================================================
+2. CÁC ĐIỂM CỘNG & TÍNH NĂNG ĐẦU TƯ CÔNG SỨC LỚN
+============================================================
+- Trợ lý AI tích hợp kiểm tra phân quyền RBAC: Nhân viên bán hàng hỏi doanh thu toàn hệ thống sẽ bị từ chối; Quản lý hỏi sẽ được báo cáo chi tiết kèm Tool calling.
+- Tự động nạp dữ liệu Demo thông minh (Seeding) ngay khi ứng dụng chạy lần đầu.
+- Giao diện Desktop Client hiện đại theo chuẩn MVVM, hỗ trợ đăng nhập 1-click chuyển đổi giữa 4 vai trò demo thuận tiện cho việc chấm điểm.
+- Hỗ trợ linh hoạt cả 2 chế độ kiến trúc: Giữa kỳ (kết nối trực tiếp DB) và Cuối kỳ (Client -> API Server -> DB).

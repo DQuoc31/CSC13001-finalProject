@@ -1,0 +1,44 @@
+HƯỚNG DẪN BIÊN DỊCH VÀ KHỞI CHẠY HỆ THỐNG TECHGEAR LAPTOP STORE
+Môn học: UDQL2 2026 / Lập trình Desktop
+Sinh viên: 23120078
+
+============================================================
+1. YÊU CẦU MÔI TRƯỜNG
+============================================================
+- Hệ điều hành: Windows 10/11
+- .NET SDK: Version 8.0 hoặc 9.0 (Kiểm tra bằng lệnh: dotnet --version)
+- Không bắt buộc cài đặt SQL Server vì hệ thống mặc định cấu hình SQLite tự động tạo file database khi chạy.
+(Nếu muốn dùng SQL Server: Đổi "DatabaseProvider": "SqlServer" và cập nhật ConnectionString trong appsettings.json).
+
+============================================================
+2. BIÊN DỊCH TOÀN BỘ MÃ NGUỒN
+============================================================
+Mở terminal tại thư mục gốc của repository (C:\Documents\Win\LaptopStore):
+
+dotnet build LaptopStore.sln
+
+============================================================
+3. CHẠY KIỂM THỬ TỰ ĐỘNG (UNIT TESTS)
+============================================================
+dotnet test
+
+============================================================
+4. KHỞI CHẠY HỆ THỐNG
+============================================================
+Bước 1: Chạy API Server
+cd src/LaptopStore.Api
+dotnet run
+(Truy cập Swagger tại: http://localhost:5000/swagger)
+
+Bước 2: Chạy Desktop Client (Mở terminal mới)
+cd src/LaptopStore.Client
+dotnet run
+
+============================================================
+5. TÀI KHOẢN ĐĂNG NHẬP DEMO
+============================================================
+- Admin:        admin / Admin@123
+- Quản lý:      manager / Manager@123
+- Bán hàng:     staff / Staff@123
+- Quản lý kho:  warehouse / Warehouse@123
+(Có thể bấm trực tiếp các nút chọn nhanh tài khoản trên thanh tiêu đề của Client).
