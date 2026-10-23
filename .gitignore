@@ -1,0 +1,66 @@
+## Ignore Visual Studio & .NET build artifacts
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio cache & temporary files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ide/
+Generated\ Files/
+*.VC.db
+*.VC.opendb
+
+## Windows App SDK / WinUI 3 Specific
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.msix
+*.appx
+*.appxbundle
+*.msixbundle
+
+## JetBrains Rider / VS Code
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## Sensitive configuration & Environment secrets
+appsettings.Production.json
+appsettings.Local.json
+*.local.json
+secrets.json
+*.pfx
+*.certificate
+pat.txt
+repo.txt
+.env
+.env.*
+
+## Database local files (when using local SQLite during development)
+*.db-shm
+*.db-wal
+
+## OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
