@@ -1,0 +1,108 @@
+<UserControl x:Class="LaptopStore.Client.Views.ProductsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề & Thao tác nhanh -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="💻 Quản Lý Sản Phẩm (Laptop &amp; Phần Cứng)" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="🔄 Tải lại" Padding="12,6" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
+                        Command="{Binding LoadCommand}"/>
+                <Button Content="🗑️ Xóa đã chọn" Padding="12,6" Margin="4,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                        Command="{Binding DeleteProductCommand}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Thanh tìm kiếm & lọc danh mục -->
+        <Border Grid.Row="1" Background="#F8FAFC" Padding="12" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="220"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ô tìm kiếm -->
+                <TextBox Grid.Column="0" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" 
+                         Padding="10,6" Margin="0,0,12,0" VerticalContentAlignment="Center"
+                         ToolTip="Tìm theo Tên laptop, SKU, Brand, CPU, GPU..."/>
+
+                <!-- Combo lọc danh mục -->
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+                          DisplayMemberPath="Name" VerticalContentAlignment="Center" Padding="8,4"/>
+            </Grid>
+        </Border>
+
+        <!-- Bảng danh sách sản phẩm và Panel xem chi tiết -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1.5*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Bảng danh sách DataGrid -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
+                      AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column" Background="White" RowHeight="38" Margin="0,0,12,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã SKU" Binding="{Binding Sku}" Width="130"/>
+                    <DataGridTextColumn Header="Tên Sản Phẩm" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Hãng" Binding="{Binding Brand}" Width="90"/>
+                    <DataGridTextColumn Header="Giá Bán" Binding="{Binding Price, StringFormat={}{0:N0} đ}" Width="130"/>
+                    <DataGridTextColumn Header="Tồn Kho" Binding="{Binding StockQuantity}" Width="80"/>
+                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Chi tiết cấu hình sản phẩm được chọn -->
+            <Border Grid.Column="1" Background="#F8FAFC" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="📋 Thông Số Kỹ Thuật" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Tên sản phẩm:" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Name}" TextWrapping="Wrap" Margin="0,2,0,8" FontSize="13" FontWeight="Bold"/>
+
+                        <TextBlock Text="Mã SKU:" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Sku}" Margin="0,2,0,8" FontSize="13"/>
+
+                        <TextBlock Text="Giá bán niêm yết:" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Price, StringFormat={}{0:N0} VNĐ}" Margin="0,2,0,8" FontSize="15" FontWeight="Bold" Foreground="#2563EB"/>
+
+                        <TextBlock Text="Số lượng tồn kho:" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.StockQuantity, StringFormat={}{0} chiếc}" Margin="0,2,0,8" FontSize="13"/>
+
+                        <Separator Margin="0,4,0,8"/>
+
+                        <TextBlock Text="Vi xử lý (CPU):" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Cpu, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Bộ nhớ (RAM):" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Ram, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Ổ cứng (SSD):" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Storage, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Card đồ họa (GPU):" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.Gpu, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Màn hình:" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.ScreenSize, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Bảo hành:" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <TextBlock Text="{Binding SelectedProduct.WarrantyMonths, StringFormat={}{0} tháng}" Margin="0,2,0,8"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

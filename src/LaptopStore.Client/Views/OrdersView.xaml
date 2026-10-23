@@ -1,0 +1,39 @@
+<UserControl x:Class="LaptopStore.Client.Views.OrdersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề & Nút tải lại -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="🧾 Quản Lý Đơn Hàng" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
+            <Button Content="🔄 Tải lại đơn hàng" HorizontalAlignment="Right" Padding="12,6"
+                    Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                    Command="{Binding LoadOrdersCommand}"/>
+        </DockPanel>
+
+        <!-- Bảng danh sách đơn hàng -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}"
+                  AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column" Background="White" RowHeight="38">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Mã Đơn Hàng" Binding="{Binding OrderNumber}" Width="150"/>
+                <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="160"/>
+                <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding CustomerPhone}" Width="120"/>
+                <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0} đ}" Width="140"/>
+                <DataGridTextColumn Header="Giảm Giá" Binding="{Binding DiscountAmount, StringFormat={}{0:N0} đ}" Width="110"/>
+                <DataGridTextColumn Header="Thành Tiền" Binding="{Binding FinalAmount, StringFormat={}{0:N0} đ}" Width="140"/>
+                <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="110"/>
+                <DataGridTextColumn Header="Thanh Toán" Binding="{Binding PaymentStatus}" Width="110"/>
+                <DataGridTextColumn Header="Thời Gian Tạo" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
