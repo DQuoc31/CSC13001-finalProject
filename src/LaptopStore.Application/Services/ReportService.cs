@@ -68,21 +68,29 @@ public class ReportService : IReportService
 
     public async Task<List<TopSellingProductDto>> GetTopSellingProductsAsync(int top = 5)
     {
-        var query = from item in _context.OrderItems
-                    join o in _context.Orders on item.OrderId equals o.Id
-                    where o.IsActive && o.Status == OrderStatus.Completed
-                    group item by new { item.ProductId, item.ProductName } into g
-                    orderby g.Sum(x => x.Quantity) descending
-                    select new TopSellingProductDto
-                    {
-                        ProductId = g.Key.ProductId,
-                        ProductName = g.Key.ProductName,
-                        Brand = "",
-                        TotalQuantitySold = g.Sum(x => x.Quantity),
-                        TotalRevenue = g.Sum(x => x.SubTotal)
-                    };
+        var completedOrderIds = await _context.Orders
+            .Where(o => o.IsActive && o.Status == OrderStatus.Completed)
+            .Select(o => o.Id)
+            .ToListAsync();
 
-        var list = await query.Take(top).ToListAsync();
+        var items = await _context.OrderItems
+            .Where(item => completedOrderIds.Contains(item.OrderId))
+            .ToListAsync();
+
+        var list = items
+            .GroupBy(item => new { item.ProductId, item.ProductName })
+            .Select(g => new TopSellingProductDto
+            {
+                ProductId = g.Key.ProductId,
+                ProductName = g.Key.ProductName,
+                Brand = "",
+                TotalQuantitySold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.SubTotal)
+            })
+            .OrderByDescending(x => x.TotalQuantitySold)
+            .Take(top)
+            .ToList();
+
         foreach (var item in list)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
