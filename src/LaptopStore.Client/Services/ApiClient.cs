@@ -15,23 +15,49 @@ public interface IApiClient
 {
     string? Token { get; set; }
     bool IsAuthenticated => !string.IsNullOrEmpty(Token);
+    string ConnectionMode { get; }
+    bool IsDirectDatabaseMode { get; }
+    void SetConnectionMode(bool useApiServer);
 
+    // Auth
     Task<LoginResponseDto?> LoginAsync(string username, string password);
+    void Logout();
+
+    // Products
     Task<List<ProductDto>> GetProductsAsync(string? keyword = null, int? categoryId = null);
     Task<ProductDto?> GetProductByIdAsync(int id);
     Task<bool> CreateProductAsync(CreateProductDto dto);
     Task<bool> UpdateProductAsync(UpdateProductDto dto);
     Task<bool> DeleteProductAsync(int id);
 
+    // Categories
     Task<List<CategoryDto>> GetCategoriesAsync();
-    Task<List<CustomerDto>> GetCustomersAsync(string? keyword = null);
-    Task<List<OrderDto>> GetOrdersAsync();
-    Task<OrderDto?> CreateOrderAsync(CreateOrderDto dto);
+    Task<CategoryDto?> GetCategoryByIdAsync(int id);
+    Task<bool> CreateCategoryAsync(CreateCategoryDto dto);
+    Task<bool> UpdateCategoryAsync(UpdateCategoryDto dto);
+    Task<bool> DeleteCategoryAsync(int id);
 
+    // Customers
+    Task<List<CustomerDto>> GetCustomersAsync(string? keyword = null);
+    Task<CustomerDto?> GetCustomerByIdAsync(int id);
+    Task<bool> CreateCustomerAsync(CreateCustomerDto dto);
+    Task<bool> UpdateCustomerAsync(UpdateCustomerDto dto);
+    Task<bool> DeleteCustomerAsync(int id);
+    Task<List<OrderDto>> GetCustomerOrdersAsync(int customerId);
+
+    // Orders
+    Task<List<OrderDto>> GetOrdersAsync();
+    Task<OrderDto?> GetOrderByIdAsync(int id);
+    Task<OrderDto?> CreateOrderAsync(CreateOrderDto dto);
+    Task<bool> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto);
+    Task<bool> CancelOrderAsync(int orderId, string reason);
+
+    // Reports
     Task<DashboardSummaryDto?> GetDashboardSummaryAsync();
     Task<List<TopSellingProductDto>> GetTopSellingProductsAsync();
     Task<List<ProductDto>> GetLowStockProductsAsync();
 
+    // AI Assistant
     Task<AiQueryResponseDto?> AskAiAsync(string prompt);
 }
 
@@ -39,6 +65,9 @@ public class ApiClient : IApiClient
 {
     private readonly HttpClient _http;
     private string? _token;
+
+    public string ConnectionMode => "API Server Mode (Ứng dụng ➔ API Server ➔ Database Server - Cuối kỳ)";
+    public bool IsDirectDatabaseMode => false;
 
     public string? Token
     {
@@ -57,9 +86,19 @@ public class ApiClient : IApiClient
         }
     }
 
+    public void SetConnectionMode(bool useApiServer)
+    {
+        // ApiClient is dedicated to API calls
+    }
+
     public ApiClient(string baseAddress = "http://localhost:5000/")
     {
         _http = new HttpClient { BaseAddress = new Uri(baseAddress) };
+    }
+
+    public void Logout()
+    {
+        Token = null;
     }
 
     public async Task<LoginResponseDto?> LoginAsync(string username, string password)
@@ -114,10 +153,62 @@ public class ApiClient : IApiClient
         return list ?? new();
     }
 
+    public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
+    {
+        return await _http.GetFromJsonAsync<CategoryDto>($"api/categories/{id}");
+    }
+
+    public async Task<bool> CreateCategoryAsync(CreateCategoryDto dto)
+    {
+        var resp = await _http.PostAsJsonAsync("api/categories", dto);
+        return resp.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> UpdateCategoryAsync(UpdateCategoryDto dto)
+    {
+        var resp = await _http.PutAsJsonAsync($"api/categories/{dto.Id}", dto);
+        return resp.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteCategoryAsync(int id)
+    {
+        var resp = await _http.DeleteAsync($"api/categories/{id}");
+        return resp.IsSuccessStatusCode;
+    }
+
     public async Task<List<CustomerDto>> GetCustomersAsync(string? keyword = null)
     {
         var url = string.IsNullOrEmpty(keyword) ? "api/customers" : $"api/customers?search={Uri.EscapeDataString(keyword)}";
         var list = await _http.GetFromJsonAsync<List<CustomerDto>>(url);
+        return list ?? new();
+    }
+
+    public async Task<CustomerDto?> GetCustomerByIdAsync(int id)
+    {
+        return await _http.GetFromJsonAsync<CustomerDto>($"api/customers/{id}");
+    }
+
+    public async Task<bool> CreateCustomerAsync(CreateCustomerDto dto)
+    {
+        var resp = await _http.PostAsJsonAsync("api/customers", dto);
+        return resp.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> UpdateCustomerAsync(UpdateCustomerDto dto)
+    {
+        var resp = await _http.PutAsJsonAsync($"api/customers/{dto.Id}", dto);
+        return resp.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteCustomerAsync(int id)
+    {
+        var resp = await _http.DeleteAsync($"api/customers/{id}");
+        return resp.IsSuccessStatusCode;
+    }
+
+    public async Task<List<OrderDto>> GetCustomerOrdersAsync(int customerId)
+    {
+        var list = await _http.GetFromJsonAsync<List<OrderDto>>($"api/customers/{customerId}/orders");
         return list ?? new();
     }
 
@@ -127,11 +218,28 @@ public class ApiClient : IApiClient
         return list ?? new();
     }
 
+    public async Task<OrderDto?> GetOrderByIdAsync(int id)
+    {
+        return await _http.GetFromJsonAsync<OrderDto>($"api/orders/{id}");
+    }
+
     public async Task<OrderDto?> CreateOrderAsync(CreateOrderDto dto)
     {
         var resp = await _http.PostAsJsonAsync("api/orders", dto);
         if (!resp.IsSuccessStatusCode) return null;
         return await resp.Content.ReadFromJsonAsync<OrderDto>();
+    }
+
+    public async Task<bool> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto)
+    {
+        var resp = await _http.PutAsJsonAsync($"api/orders/{orderId}/status", dto);
+        return resp.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> CancelOrderAsync(int orderId, string reason)
+    {
+        var resp = await _http.PostAsJsonAsync($"api/orders/{orderId}/cancel", new { Reason = reason });
+        return resp.IsSuccessStatusCode;
     }
 
     public async Task<DashboardSummaryDto?> GetDashboardSummaryAsync()

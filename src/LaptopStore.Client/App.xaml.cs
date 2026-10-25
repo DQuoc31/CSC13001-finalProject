@@ -1,5 +1,9 @@
+using LaptopStore.Application.Interfaces;
 using LaptopStore.Client.Services;
 using LaptopStore.Client.ViewModels;
+using LaptopStore.Infrastructure;
+using LaptopStore.Infrastructure.Persistence;
+using LaptopStore.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
@@ -28,24 +32,48 @@ public partial class App : WpfApplication
         var configuration = configBuilder.Build();
 
         var apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:5000/";
+        var defaultUseApi = (configuration["ConnectionMode"] ?? "DirectDatabase")
+            .Equals("ApiServer", StringComparison.OrdinalIgnoreCase);
 
-        // 1. HTTP Api Client
-        services.AddSingleton<IApiClient>(new ApiClient(apiBaseUrl));
+        // 1. Tầng dữ liệu Infrastructure (DbContext, Services, Security) cho chế độ Giữa kỳ (Direct DB)
+        services.AddInfrastructureServices(configuration);
 
-        // 2. ViewModels
+        // 2. Đăng ký Dual Mode Data Services (hỗ trợ cả Giữa kỳ và Cuối kỳ)
+        services.AddSingleton(new ApiClient(apiBaseUrl));
+        services.AddSingleton<DirectDatabaseService>();
+        services.AddSingleton<IApiClient>(sp => new DualModeStoreService(
+            sp.GetRequiredService<DirectDatabaseService>(),
+            sp.GetRequiredService<ApiClient>(),
+            defaultUseApi));
+
+        // 3. ViewModels
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductsViewModel>();
         services.AddTransient<OrdersViewModel>();
         services.AddTransient<AiAssistantViewModel>();
         services.AddSingleton<MainViewModel>();
 
-        // 3. Views
+        // 4. Views
         services.AddSingleton<MainWindow>();
     }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Tự động khởi tạo Database và nạp dữ liệu mẫu Demo (Giữa kỳ: Ứng dụng -> Database)
+        try
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<LaptopStoreDbContext>();
+            var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            await DbInitializer.SeedAsync(db, hasher);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Seed Error: {ex.Message}");
+        }
+
         var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
     }
