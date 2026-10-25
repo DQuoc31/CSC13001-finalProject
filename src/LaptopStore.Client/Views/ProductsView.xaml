@@ -16,10 +16,14 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <TextBlock Text="💻 Quản Lý Sản Phẩm (Laptop &amp; Phần Cứng)" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="🔄 Tải lại" Padding="12,6" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
-                        Command="{Binding LoadCommand}"/>
+                <Button Content="➕ Thêm Sản Phẩm" Padding="14,6" Margin="4,0" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="Bold"
+                        Command="{Binding AddProductCommand}"/>
+                <Button Content="✏️ Sửa Sản Phẩm" Padding="14,6" Margin="4,0" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                        Command="{Binding EditProductCommand}"/>
                 <Button Content="🗑️ Xóa đã chọn" Padding="12,6" Margin="4,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
                         Command="{Binding DeleteProductCommand}"/>
+                <Button Content="🔄 Tải lại" Padding="12,6" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
+                        Command="{Binding LoadCommand}"/>
             </StackPanel>
         </DockPanel>
 
