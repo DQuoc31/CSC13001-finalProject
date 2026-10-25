@@ -1,0 +1,100 @@
+<UserControl x:Class="LaptopStore.Client.Views.CustomersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Tiêu đề & Thao tác nhanh -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="👥 Quản Lý Khách Hàng" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
+                <TextBlock Text="Thông tin thành viên, tích lũy điểm thưởng và lịch sử mua sắm" FontSize="13" Foreground="#64748B" Margin="0,2,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="➕ Thêm Khách Hàng" Padding="14,6" Margin="4,0" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="Bold"
+                        Command="{Binding AddCustomerCommand}"/>
+                <Button Content="✏️ Sửa Khách Hàng" Padding="14,6" Margin="4,0" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                        Command="{Binding EditCustomerCommand}"/>
+                <Button Content="🗑️ Xóa Khách Hàng" Padding="12,6" Margin="4,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                        Command="{Binding DeleteCustomerCommand}"/>
+                <Button Content="🔄 Tải lại" Padding="12,6" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
+                        Command="{Binding LoadCommand}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Thanh tìm kiếm -->
+        <Border Grid.Row="1" Background="#F8FAFC" Padding="12" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,16">
+            <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" 
+                     Padding="10,6" VerticalContentAlignment="Center"
+                     ToolTip="Tìm kiếm theo Họ tên hoặc Số điện thoại khách hàng..."/>
+        </Border>
+
+        <!-- Bảng danh sách & Chi tiết lịch sử -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Bảng danh sách khách hàng -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}"
+                      AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column" Background="White" RowHeight="40" Margin="0,0,16,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã KH" Binding="{Binding CustomerCode}" Width="90"/>
+                    <DataGridTextColumn Header="Họ và Tên" Binding="{Binding FullName}" Width="160" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding PhoneNumber}" Width="120"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="150"/>
+                    <DataGridTextColumn Header="Điểm Thưởng" Binding="{Binding RewardPoints, StringFormat={}{0} điểm}" Width="100"/>
+                    <DataGridTextColumn Header="Tổng Chi Tiêu" Binding="{Binding TotalSpent, StringFormat={}{0:N0} đ}" Width="130"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Khung chi tiết khách hàng và Lịch sử đơn hàng -->
+            <Border Grid.Column="1" Background="#F8FAFC" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Thông tin cá nhân -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="👤 Hồ Sơ Khách Hàng" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding SelectedCustomer.FullName, TargetNullValue='(Chưa chọn khách hàng)'}" FontSize="15" FontWeight="Bold" Foreground="#2563EB"/>
+                        <TextBlock Text="{Binding SelectedCustomer.PhoneNumber, StringFormat={}SĐT: {0}}" FontSize="13" Foreground="#475569" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding SelectedCustomer.Address, StringFormat={}Địa chỉ: {0}, TargetNullValue='Địa chỉ: Chưa cập nhật'}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding SelectedCustomer.Note, StringFormat={}Ghi chú: {0}}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <Separator Grid.Row="1" Margin="0,0,0,12"/>
+
+                    <!-- Danh sách đơn hàng đã mua -->
+                    <DockPanel Grid.Row="2">
+                        <TextBlock DockPanel.Dock="Top" Text="📦 Lịch Sử Đơn Hàng" FontSize="14" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,8"/>
+                        
+                        <DataGrid ItemsSource="{Binding SelectedCustomerOrders}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White" RowHeight="34">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Mã Đơn" Binding="{Binding OrderNumber}" Width="110"/>
+                                <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding FinalAmount, StringFormat={}{0:N0} đ}" Width="100"/>
+                                <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="90"/>
+                                <DataGridTextColumn Header="Ngày Mua" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy}}" Width="95"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
