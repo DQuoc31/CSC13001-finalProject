@@ -4,36 +4,104 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="1100">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Tiêu đề & Nút tải lại -->
+        <!-- Tiêu đề & Thao tác nhanh -->
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="🧾 Quản Lý Đơn Hàng" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
-            <Button Content="🔄 Tải lại đơn hàng" HorizontalAlignment="Right" Padding="12,6"
-                    Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                    Command="{Binding LoadOrdersCommand}"/>
+            <StackPanel>
+                <TextBlock Text="🧾 Quản Lý Đơn Hàng &amp; Bán Hàng" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
+                <TextBlock Text="Theo dõi trạng thái đơn hàng, kiểm tra chi tiết và lập đơn bán mới" FontSize="13" Foreground="#64748B" Margin="0,2,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="➕ Lập Đơn Hàng Mới" Padding="16,7" Margin="4,0" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="Bold"
+                        Command="{Binding CreateOrderCommand}"/>
+                <Button Content="🔄 Tải lại danh sách" Padding="12,7" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
+                        Command="{Binding LoadOrdersCommand}"/>
+            </StackPanel>
         </DockPanel>
 
-        <!-- Bảng danh sách đơn hàng -->
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}"
-                  AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                  HeadersVisibility="Column" Background="White" RowHeight="38">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Mã Đơn Hàng" Binding="{Binding OrderNumber}" Width="150"/>
-                <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="160"/>
-                <DataGridTextColumn Header="Số Điện Thoại" Binding="{Binding CustomerPhone}" Width="120"/>
-                <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0} đ}" Width="140"/>
-                <DataGridTextColumn Header="Giảm Giá" Binding="{Binding DiscountAmount, StringFormat={}{0:N0} đ}" Width="110"/>
-                <DataGridTextColumn Header="Thành Tiền" Binding="{Binding FinalAmount, StringFormat={}{0:N0} đ}" Width="140"/>
-                <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="110"/>
-                <DataGridTextColumn Header="Thanh Toán" Binding="{Binding PaymentStatus}" Width="110"/>
-                <DataGridTextColumn Header="Thời Gian Tạo" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="150"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Bảng danh sách đơn hàng & Panel chi tiết đơn hàng -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Bảng danh sách đơn hàng -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}"
+                      AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column" Background="White" RowHeight="38" Margin="0,0,16,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding OrderNumber}" Width="120" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="150"/>
+                    <DataGridTextColumn Header="SĐT" Binding="{Binding CustomerPhone}" Width="110"/>
+                    <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding FinalAmount, StringFormat={}{0:N0} đ}" Width="130" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="105"/>
+                    <DataGridTextColumn Header="Thanh Toán" Binding="{Binding PaymentStatus}" Width="105"/>
+                    <DataGridTextColumn Header="Ngày Tạo" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="135"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Panel Chi tiết đơn hàng và cập nhật trạng thái -->
+            <Border Grid.Column="1" Background="#F8FAFC" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Thông tin tổng quát đơn hàng -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="📋 Chi Tiết Hóa Đơn Bán Hàng" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding SelectedOrder.OrderNumber, TargetNullValue='(Chưa chọn đơn hàng)'}" FontSize="15" FontWeight="Bold" Foreground="#2563EB"/>
+                        <TextBlock Text="{Binding SelectedOrder.CustomerName, StringFormat={}Khách hàng: {0}}" FontSize="13" Foreground="#334155" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding SelectedOrder.CustomerPhone, StringFormat={}SĐT liên hệ: {0}}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding SelectedOrder.FinalAmount, StringFormat={}Tổng thanh toán: {0:N0} VNĐ}" FontSize="14" FontWeight="Bold" Foreground="#10B981" Margin="0,4,0,0"/>
+                        <TextBlock Text="{Binding SelectedOrder.Status, StringFormat={}Trạng thái hiện tại: {0}}" FontSize="12" FontWeight="SemiBold" Foreground="#D97706" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <Separator Grid.Row="1" Margin="0,0,0,12"/>
+
+                    <!-- Danh sách sản phẩm bên trong đơn hàng -->
+                    <DockPanel Grid.Row="2" Margin="0,0,0,12">
+                        <TextBlock DockPanel.Dock="Top" Text="📦 Các Sản Phẩm Đã Mua" FontSize="13" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,6"/>
+                        <DataGrid ItemsSource="{Binding SelectedOrderItems}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White" RowHeight="32">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Mã SKU" Binding="{Binding ProductSku}" Width="100"/>
+                                <DataGridTextColumn Header="Tên Sản Phẩm" Binding="{Binding ProductName}" Width="*"/>
+                                <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="45"/>
+                                <DataGridTextColumn Header="Đơn Giá" Binding="{Binding UnitPrice, StringFormat={}{0:N0} đ}" Width="95"/>
+                                <DataGridTextColumn Header="Thành Tiền" Binding="{Binding SubTotal, StringFormat={}{0:N0} đ}" Width="100" FontWeight="SemiBold"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <!-- Thao tác thay đổi trạng thái đơn hàng -->
+                    <Border Grid.Row="3" Background="White" CornerRadius="6" Padding="12" BorderBrush="#E2E8F0" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="⚙️ Cập Nhật Trạng Thái Đơn Hàng" FontWeight="Bold" FontSize="12" Foreground="#334155" Margin="0,0,0,8"/>
+                            <UniformGrid Columns="2" Margin="0,0,0,6">
+                                <Button Content="🚚 Đang Xử Lý" Padding="8,5" Margin="2" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                                        Command="{Binding UpdateStatusCommand}" CommandParameter="Processing"/>
+                                <Button Content="✅ Hoàn Thành" Padding="8,5" Margin="2" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
+                                        Command="{Binding UpdateStatusCommand}" CommandParameter="Completed"/>
+                            </UniformGrid>
+                            <Button Content="❌ Hủy Đơn Hàng (Hoàn Tồn Kho)" Padding="10,6" Margin="2,4,2,0" Background="#FEE2E2" Foreground="#DC2626"
+                                    BorderBrush="#FCA5A5" BorderThickness="1" FontWeight="Bold"
+                                    Command="{Binding CancelOrderCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
