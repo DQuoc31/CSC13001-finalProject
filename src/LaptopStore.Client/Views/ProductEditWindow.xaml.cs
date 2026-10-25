@@ -132,7 +132,7 @@ public partial class ProductEditWindow : Window
                 ScreenSize = string.IsNullOrWhiteSpace(TxtScreen.Text) ? null : TxtScreen.Text.Trim(),
                 OperatingSystem = string.IsNullOrWhiteSpace(TxtOs.Text) ? null : TxtOs.Text.Trim(),
                 Description = string.IsNullOrWhiteSpace(TxtDescription.Text) ? null : TxtDescription.Text.Trim(),
-                Status = stock > 0 ? ProductStatus.InStock : ProductStatus.OutOfStock
+                Status = stock > 0 ? ProductStatus.Active : ProductStatus.OutOfStock
             };
         }
         else

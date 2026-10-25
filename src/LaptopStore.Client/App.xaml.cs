@@ -49,6 +49,8 @@ public partial class App : WpfApplication
         // 3. ViewModels
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<ProductsViewModel>();
+        services.AddTransient<CategoriesViewModel>();
+        services.AddTransient<CustomersViewModel>();
         services.AddTransient<OrdersViewModel>();
         services.AddTransient<AiAssistantViewModel>();
         services.AddSingleton<MainViewModel>();

@@ -116,7 +116,7 @@ public class ProductsViewModel : ViewModelBase
     private async Task AddProductAsync()
     {
         var dialog = new ProductEditWindow(Categories.ToList());
-        dialog.Owner = Application.Current.MainWindow;
+        dialog.Owner = System.Windows.Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ResultCreateDto != null)
         {
             IsBusy = true;
@@ -153,7 +153,7 @@ public class ProductsViewModel : ViewModelBase
         if (SelectedProduct == null) return;
 
         var dialog = new ProductEditWindow(Categories.ToList(), SelectedProduct);
-        dialog.Owner = Application.Current.MainWindow;
+        dialog.Owner = System.Windows.Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ResultUpdateDto != null)
         {
             IsBusy = true;

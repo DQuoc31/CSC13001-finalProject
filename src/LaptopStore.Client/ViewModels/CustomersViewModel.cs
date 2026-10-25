@@ -103,7 +103,7 @@ public class CustomersViewModel : ViewModelBase
     private async Task AddCustomerAsync()
     {
         var dialog = new CustomerEditWindow();
-        dialog.Owner = Application.Current.MainWindow;
+        dialog.Owner = System.Windows.Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ResultCreateDto != null)
         {
             IsBusy = true;
@@ -140,7 +140,7 @@ public class CustomersViewModel : ViewModelBase
         if (SelectedCustomer == null) return;
 
         var dialog = new CustomerEditWindow(SelectedCustomer);
-        dialog.Owner = Application.Current.MainWindow;
+        dialog.Owner = System.Windows.Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ResultUpdateDto != null)
         {
             IsBusy = true;

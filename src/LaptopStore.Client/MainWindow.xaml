@@ -7,7 +7,7 @@
         xmlns:views="clr-namespace:LaptopStore.Client.Views"
         mc:Ignorable="d"
         Title="TechGear Laptop Store - Hệ Thống Quản Lý Bán Hàng (Đồ Án UDQL2 2026 - MSSV: 23120078)"
-        Height="780" Width="1240" MinWidth="1050" MinHeight="680"
+        Height="800" Width="1280" MinWidth="1100" MinHeight="700"
         WindowStartupLocation="CenterScreen" Background="#F1F5F9">
 
     <Window.Resources>
@@ -16,6 +16,12 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ProductsViewModel}">
             <views:ProductsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CategoriesViewModel}">
+            <views:CategoriesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CustomersViewModel}">
+            <views:CustomersView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:OrdersViewModel}">
             <views:OrdersView/>
@@ -40,7 +46,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="64"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
@@ -52,15 +58,25 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="⚡ TECHGEAR" FontSize="20" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
                     <TextBlock Text="LAPTOP STORE" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Margin="6,0,16,0"/>
-                    <Border Background="#334155" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                    <Border Background="#334155" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
                         <TextBlock Text="MSSV: 23120078 | UDQL2 2026" Foreground="#94A3B8" FontSize="11"/>
                     </Border>
+                    
+                    <!-- Nút chuyển đổi Kiến trúc: Giữa kỳ (Direct DB) <-> Cuối kỳ (API Server) -->
+                    <Button Margin="16,0,0,0" Padding="12,5" Background="#0EA5E9" Foreground="White" BorderThickness="0"
+                            FontWeight="Bold" FontSize="11" ToolTip="Bấm để chuyển đổi giữa mô hình Giữa kỳ (kết nối trực tiếp DB) và Cuối kỳ (qua Web API)"
+                            Command="{Binding ToggleConnectionModeCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔄 Kiến Trúc: "/>
+                            <TextBlock Text="{Binding ConnectionModeBadge}"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <!-- Thông tin đăng nhập & tài khoản demo nhanh -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <!-- Tài khoản demo buttons -->
-                    <TextBlock Text="Đăng nhập Demo:" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12"/>
+                    <TextBlock Text="Tài khoản:" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12"/>
                     <Button Content="Admin" Margin="2,0" Padding="8,3" Background="#3B82F6" Foreground="White" BorderThickness="0" FontSize="11"
                             Command="{Binding QuickSelectAccountCommand}" CommandParameter="admin"/>
                     <Button Content="Manager" Margin="2,0" Padding="8,3" Background="#10B981" Foreground="White" BorderThickness="0" FontSize="11"
@@ -99,16 +115,22 @@
                 <DockPanel>
                     <!-- Danh mục chuyển trang -->
                     <StackPanel DockPanel.Dock="Top">
-                        <TextBlock Text="CHỨC NĂNG CHÍNH" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="8,0,0,8"/>
+                        <TextBlock Text="CHỨC NĂNG CHÍNH (GIỮA KỲ &amp; CUỐI KỲ)" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="8,0,0,8"/>
 
                         <Button Style="{StaticResource NavButtonStyle}" Content="💻 Quản Lý Sản Phẩm"
                                 Command="{Binding NavigateProductsCommand}"/>
 
-                        <Button Style="{StaticResource NavButtonStyle}" Content="📊 Báo Cáo Doanh Thu"
-                                Command="{Binding NavigateDashboardCommand}"/>
+                        <Button Style="{StaticResource NavButtonStyle}" Content="📁 Quản Lý Danh Mục"
+                                Command="{Binding NavigateCategoriesCommand}"/>
+
+                        <Button Style="{StaticResource NavButtonStyle}" Content="👥 Quản Lý Khách Hàng"
+                                Command="{Binding NavigateCustomersCommand}"/>
 
                         <Button Style="{StaticResource NavButtonStyle}" Content="🧾 Quản Lý Đơn Hàng"
                                 Command="{Binding NavigateOrdersCommand}"/>
+
+                        <Button Style="{StaticResource NavButtonStyle}" Content="📊 Báo Cáo &amp; Thống Kê"
+                                Command="{Binding NavigateDashboardCommand}"/>
 
                         <Button Style="{StaticResource NavButtonStyle}" Content="🤖 Trợ Lý AI Nghiệp Vụ"
                                 Command="{Binding NavigateAiCommand}"/>
@@ -118,8 +140,8 @@
                     <Border DockPanel.Dock="Bottom" Background="#F8FAFC" CornerRadius="8" Padding="12" BorderBrush="#E2E8F0" BorderThickness="1">
                         <StackPanel>
                             <TextBlock Text="Kiến Trúc Hoạt Động" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
-                            <TextBlock Text="Client ➔ API Server ➔ SQLite/SQL Server" FontSize="10" Foreground="#64748B" Margin="0,4,0,0" TextWrapping="Wrap"/>
-                            <TextBlock Text="Xác thực: JWT Bearer RBAC" FontSize="10" Foreground="#10B981" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding ConnectionMode}" FontSize="10" Foreground="#2563EB" Margin="0,4,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                            <TextBlock Text="Xác thực: Salted Hash &amp; JWT Bearer RBAC" FontSize="10" Foreground="#10B981" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                 </DockPanel>

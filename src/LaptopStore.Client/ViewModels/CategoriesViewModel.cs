@@ -68,7 +68,7 @@ public class CategoriesViewModel : ViewModelBase
     private async Task AddCategoryAsync()
     {
         var dialog = new CategoryEditWindow();
-        dialog.Owner = Application.Current.MainWindow;
+        dialog.Owner = System.Windows.Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ResultCreateDto != null)
         {
             IsBusy = true;
@@ -105,7 +105,7 @@ public class CategoriesViewModel : ViewModelBase
         if (SelectedCategory == null) return;
 
         var dialog = new CategoryEditWindow(SelectedCategory);
-        dialog.Owner = Application.Current.MainWindow;
+        dialog.Owner = System.Windows.Application.Current.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ResultUpdateDto != null)
         {
             IsBusy = true;

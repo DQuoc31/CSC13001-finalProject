@@ -11,7 +11,7 @@ public class MainViewModel : ViewModelBase
 
     private object? _currentView;
     private LoginResponseDto? _currentUser;
-    private string _connectionMode = "API Server Mode (Cuối kỳ)";
+    private string _connectionMode;
     private string _loginUsername = "admin";
     private string _loginPassword = "Admin@123";
 
@@ -50,6 +50,10 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _connectionMode, value);
     }
 
+    public string ConnectionModeBadge => _apiClient.IsDirectDatabaseMode
+        ? "⚡ Chế độ Giữa kỳ: Direct Database (Ứng dụng ➔ Database Server)"
+        : "🌐 Chế độ Cuối kỳ: Web API (Client ➔ API Server ➔ Database Server)";
+
     public string LoginUsername
     {
         get => _loginUsername;
@@ -65,14 +69,19 @@ public class MainViewModel : ViewModelBase
     // ViewModels con
     public DashboardViewModel DashboardVM { get; }
     public ProductsViewModel ProductsVM { get; }
+    public CategoriesViewModel CategoriesVM { get; }
+    public CustomersViewModel CustomersVM { get; }
     public OrdersViewModel OrdersVM { get; }
     public AiAssistantViewModel AiAssistantVM { get; }
 
     // Commands
     public IRelayCommand NavigateDashboardCommand { get; }
     public IRelayCommand NavigateProductsCommand { get; }
+    public IRelayCommand NavigateCategoriesCommand { get; }
+    public IRelayCommand NavigateCustomersCommand { get; }
     public IRelayCommand NavigateOrdersCommand { get; }
     public IRelayCommand NavigateAiCommand { get; }
+    public IRelayCommand ToggleConnectionModeCommand { get; }
     public IAsyncRelayCommand LoginCommand { get; }
     public IRelayCommand LogoutCommand { get; }
     public IRelayCommand<string> QuickSelectAccountCommand { get; }
@@ -81,14 +90,20 @@ public class MainViewModel : ViewModelBase
         IApiClient apiClient,
         DashboardViewModel dashboardVM,
         ProductsViewModel productsVM,
+        CategoriesViewModel categoriesVM,
+        CustomersViewModel customersVM,
         OrdersViewModel ordersVM,
         AiAssistantViewModel aiAssistantVM)
     {
         _apiClient = apiClient;
         DashboardVM = dashboardVM;
         ProductsVM = productsVM;
+        CategoriesVM = categoriesVM;
+        CustomersVM = customersVM;
         OrdersVM = ordersVM;
         AiAssistantVM = aiAssistantVM;
+
+        _connectionMode = _apiClient.ConnectionMode;
 
         NavigateDashboardCommand = new RelayCommand(() =>
         {
@@ -102,6 +117,18 @@ public class MainViewModel : ViewModelBase
             _ = ProductsVM.LoadAllAsync();
         });
 
+        NavigateCategoriesCommand = new RelayCommand(() =>
+        {
+            CurrentView = CategoriesVM;
+            _ = CategoriesVM.LoadCategoriesAsync();
+        });
+
+        NavigateCustomersCommand = new RelayCommand(() =>
+        {
+            CurrentView = CustomersVM;
+            _ = CustomersVM.LoadCustomersAsync();
+        });
+
         NavigateOrdersCommand = new RelayCommand(() =>
         {
             CurrentView = OrdersVM;
@@ -113,12 +140,30 @@ public class MainViewModel : ViewModelBase
             CurrentView = AiAssistantVM;
         });
 
+        ToggleConnectionModeCommand = new RelayCommand(ToggleConnectionMode);
+
         LoginCommand = new AsyncRelayCommand(LoginAsync);
         LogoutCommand = new RelayCommand(Logout);
         QuickSelectAccountCommand = new RelayCommand<string>(QuickSelectAccount);
 
         // Mặc định ban đầu chọn màn hình Sản phẩm
         CurrentView = ProductsVM;
+    }
+
+    private void ToggleConnectionMode()
+    {
+        bool newApiMode = _apiClient.IsDirectDatabaseMode; // toggle
+        _apiClient.SetConnectionMode(newApiMode);
+        ConnectionMode = _apiClient.ConnectionMode;
+        OnPropertyChanged(nameof(ConnectionModeBadge));
+
+        string modeName = newApiMode ? "Cuối kỳ (Client ➔ API Server ➔ Database)" : "Giữa kỳ (Ứng dụng ➔ Database Server)";
+        StatusMessage = $"Đã chuyển sang: {modeName}";
+        MessageBox.Show(
+            $"Đã chuyển kiến trúc sang:\n{_apiClient.ConnectionMode}\n\n(Lưu ý: Nếu dùng API Server, hãy chắc chắn 'LaptopStore.Api' đang chạy).",
+            "Chuyển Đổi Kiến Trúc Hoạt Động",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void QuickSelectAccount(string? roleKey)
@@ -165,8 +210,8 @@ public class MainViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Lỗi kết nối API Server: {ex.Message}";
-            MessageBox.Show($"Không thể kết nối đến API Server: {ex.Message}\nHãy chắc chắn bạn đã khởi động 'LaptopStore.Api'.", "Lỗi kết nối", MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusMessage = $"Lỗi kết nối ({_apiClient.ConnectionMode}): {ex.Message}";
+            MessageBox.Show($"Không thể kết nối:\n{ex.Message}\n\nNếu đang ở chế độ API Server, hãy chắc chắn 'LaptopStore.Api' đã được khởi chạy.", "Lỗi kết nối", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -176,7 +221,7 @@ public class MainViewModel : ViewModelBase
 
     private void Logout()
     {
-        _apiClient.Token = null;
+        _apiClient.Logout();
         CurrentUser = null;
         StatusMessage = "Đã đăng xuất khỏi hệ thống.";
     }

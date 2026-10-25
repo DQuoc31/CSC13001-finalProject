@@ -100,7 +100,7 @@ public class OrdersViewModel : ViewModelBase
             var products = await _apiClient.GetProductsAsync();
 
             var dialog = new CreateOrderWindow(customers, products);
-            dialog.Owner = Application.Current.MainWindow;
+            dialog.Owner = System.Windows.Application.Current.MainWindow;
             if (dialog.ShowDialog() == true && dialog.ResultOrderDto != null)
             {
                 StatusMessage = "Đang lập đơn hàng và kiểm tra tồn kho...";
