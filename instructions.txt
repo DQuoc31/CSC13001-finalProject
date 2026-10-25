@@ -1,44 +1,64 @@
 HƯỚNG DẪN BIÊN DỊCH VÀ KHỞI CHẠY HỆ THỐNG TECHGEAR LAPTOP STORE
 Môn học: UDQL2 2026 / Lập trình Desktop
-Sinh viên: 23120078
+Sinh viên thực hiện:
+- 23120068: Lê Nguyễn Minh Nhật
+- 23120069: Nguyễn Trần Quỳnh Như
+- 23210078: Đặng Mai Quốc
+Branch Git: feature/midterm-progress-completion
 
 ============================================================
 1. YÊU CẦU MÔI TRƯỜNG
 ============================================================
 - Hệ điều hành: Windows 10/11
 - .NET SDK: Version 8.0 hoặc 9.0 (Kiểm tra bằng lệnh: dotnet --version)
-- Không bắt buộc cài đặt SQL Server vì hệ thống mặc định cấu hình SQLite tự động tạo file database khi chạy.
-(Nếu muốn dùng SQL Server: Đổi "DatabaseProvider": "SqlServer" và cập nhật ConnectionString trong appsettings.json).
+- CSDL: Hệ thống mặc định cấu hình SQLite tự động tạo và seed data vào file 'laptopstore.db' ngay khi chạy lần đầu, không cần cài đặt thêm phần mềm quản trị CSDL ngoài.
+(Nếu muốn kết nối Microsoft SQL Server: Cập nhật "DatabaseProvider": "SqlServer" và ConnectionString trong appsettings.json).
 
 ============================================================
-2. BIÊN DỊCH TOÀN BỘ MÃ NGUỒN
+2. BIÊN DỊCH TOÀN BỘ MÃ NGUỒN VÀ CHẠY TEST
 ============================================================
-Mở terminal tại thư mục gốc của repository (C:\Documents\Win\LaptopStore):
+Mở terminal tại thư mục gốc của repository:
 
-dotnet build LaptopStore.sln
+1. Biên dịch:
+   dotnet build LaptopStore.sln
 
-============================================================
-3. CHẠY KIỂM THỬ TỰ ĐỘNG (UNIT TESTS)
-============================================================
-dotnet test
-
-============================================================
-4. KHỞI CHẠY HỆ THỐNG
-============================================================
-Bước 1: Chạy API Server
-cd src/LaptopStore.Api
-dotnet run
-(Truy cập Swagger tại: http://localhost:5000/swagger)
-
-Bước 2: Chạy Desktop Client (Mở terminal mới)
-cd src/LaptopStore.Client
-dotnet run
+2. Chạy 12 bài kiểm thử tự động (Unit Tests):
+   dotnet test
 
 ============================================================
-5. TÀI KHOẢN ĐĂNG NHẬP DEMO
+3. KHỞI CHẠY HỆ THỐNG THEO 2 MÔ HÌNH KIẾN TRÚC
 ============================================================
-- Admin:        admin / Admin@123
-- Quản lý:      manager / Manager@123
-- Bán hàng:     staff / Staff@123
-- Quản lý kho:  warehouse / Warehouse@123
-(Có thể bấm trực tiếp các nút chọn nhanh tài khoản trên thanh tiêu đề của Client).
+CÁCH 1: KHỞI CHẠY CHẾ ĐỘ GIỮA KỲ (Ứng dụng ➔ Database Server)
+(Chạy trực tiếp Desktop Client, kết nối trực tiếp SQLite DB, không cần chạy Web API)
+
+   cd src/LaptopStore.Client
+   dotnet run
+
+- Ứng dụng sẽ tự động khởi tạo database SQLite và nạp toàn bộ 24 sản phẩm, 5 danh mục, 12 khách hàng, 22 đơn hàng mẫu.
+- Trên thanh Header hiển thị: "⚡ Chế độ Giữa kỳ: Direct Database (Ứng dụng ➔ Database Server)".
+
+---
+
+CÁCH 2: KHỞI CHẠY CHẾ ĐỘ CUỐI KỲ (Ứng dụng ➔ API Server ➔ Database Server)
+(Gồm 2 terminal: Terminal 1 chạy Web API, Terminal 2 chạy Client)
+
+- Terminal 1 (Khởi động API Server):
+   cd src/LaptopStore.Api
+   dotnet run
+   (Truy cập Swagger kiểm thử API tại: http://localhost:5000/swagger)
+
+- Terminal 2 (Khởi động Desktop Client):
+   cd src/LaptopStore.Client
+   dotnet run
+
+- Bấm nút "🔄 Kiến Trúc" trên thanh Header để chuyển sang chế độ API Server.
+
+============================================================
+4. TÀI KHOẢN ĐĂNG NHẬP DEMO (RBAC)
+============================================================
+- Admin:          admin / Admin@123         (Toàn quyền hệ thống)
+- Quản lý:        manager / Manager@123     (Xem báo cáo, quản lý đơn & danh mục)
+- Bán hàng:       staff / Staff@123         (Lập đơn bán hàng, xem tồn kho & khách)
+- Quản lý kho:    warehouse / Warehouse@123 (Cập nhật tồn kho, xem sản phẩm)
+
+(Có thể bấm trực tiếp các nút chọn nhanh tài khoản trên thanh tiêu đề của Client để đăng nhập 1-click).

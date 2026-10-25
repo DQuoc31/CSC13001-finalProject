@@ -1,7 +1,10 @@
 # 🏛️ KIẾN TRÚC HỆ THỐNG TECHGEAR LAPTOP STORE
 
 > **Đồ án môn học:** Ứng dụng Quản lý 2 (UDQL2 2026) / Lập trình Desktop  
-> **Sinh viên thực hiện:** 23120078  
+> **Sinh viên thực hiện:**  
+> - 23120068: Lê Nguyễn Minh Nhật  
+> - 23120069: Nguyễn Trần Quỳnh Như  
+> - 23210078: Đặng Mai Quốc  
 > **Chủ đề cửa hàng (Số cuối MSSV = 8):** Cửa hàng bán laptop hoặc phần cứng máy tính
 
 ---

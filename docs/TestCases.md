@@ -1,7 +1,7 @@
 # 🧪 TÀI LIỆU KIỂM THỬ CHẤT LƯỢNG HỆ THỐNG (TEST CASES)
 
 > **Môn học:** UDQL2 2026 / Lập trình Desktop  
-> **Dự án:** TechGear Laptop Store (MSSV: 23120078)  
+> **Dự án:** TechGear Laptop Store (Nhóm SV: 23120068 - 23120069 - 23210078)  
 > **Phương pháp kiểm thử:** Automated Unit Tests (xUnit) & API Integration Tests
 
 ---

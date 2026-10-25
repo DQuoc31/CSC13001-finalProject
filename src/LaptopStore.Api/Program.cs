@@ -62,7 +62,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "LaptopStore API - Đồ án UDQL2 2026",
         Version = "v1",
-        Description = "RESTful Web API cho Hệ thống Quản lý và Bán hàng Laptop & Thiết bị Công nghệ (MSSV: 23120078).\n" +
+        Description = "RESTful Web API cho Hệ thống Quản lý và Bán hàng Laptop & Thiết bị Công nghệ (Nhóm SV: 23120068 - 23120069 - 23210078).\n" +
                       "Tài khoản demo:\n" +
                       "- Admin: admin / Admin@123\n" +
                       "- Quản lý: manager / Manager@123\n" +

@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:LaptopStore.Client.ViewModels"
         xmlns:views="clr-namespace:LaptopStore.Client.Views"
         mc:Ignorable="d"
-        Title="TechGear Laptop Store - Hệ Thống Quản Lý Bán Hàng (Đồ Án UDQL2 2026 - MSSV: 23120078)"
+        Title="TechGear Laptop Store - Hệ Thống Quản Lý Bán Hàng (Đồ Án UDQL2 2026 - Nhóm: 23120068, 23120069, 23210078)"
         Height="800" Width="1280" MinWidth="1100" MinHeight="700"
         WindowStartupLocation="CenterScreen" Background="#F1F5F9">
 
@@ -59,7 +59,7 @@
                     <TextBlock Text="⚡ TECHGEAR" FontSize="20" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
                     <TextBlock Text="LAPTOP STORE" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Margin="6,0,16,0"/>
                     <Border Background="#334155" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
-                        <TextBlock Text="MSSV: 23120078 | UDQL2 2026" Foreground="#94A3B8" FontSize="11"/>
+                        <TextBlock Text="Nhóm: 23120068 - 23120069 - 23210078 | UDQL2 2026" Foreground="#94A3B8" FontSize="11"/>
                     </Border>
                     
                     <!-- Nút chuyển đổi Kiến trúc: Giữa kỳ (Direct DB) <-> Cuối kỳ (API Server) -->
