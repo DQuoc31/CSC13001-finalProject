@@ -75,8 +75,8 @@ public class CategoriesViewModel : ViewModelBase
             StatusMessage = "Đang thêm danh mục mới...";
             try
             {
-                var ok = await _apiClient.CreateCategoryAsync(dialog.ResultCreateDto);
-                if (ok)
+                var result = await _apiClient.CreateCategoryAsync(dialog.ResultCreateDto);
+                if (result.IsSuccess)
                 {
                     StatusMessage = $"Đã thêm danh mục: {dialog.ResultCreateDto.Name}";
                     MessageBox.Show("Thêm mới danh mục thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -84,8 +84,8 @@ public class CategoriesViewModel : ViewModelBase
                 }
                 else
                 {
-                    StatusMessage = "Thêm danh mục thất bại.";
-                    MessageBox.Show("Không thể tạo danh mục.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusMessage = result.Error ?? "Thêm danh mục thất bại.";
+                    MessageBox.Show(result.Error ?? "Không thể tạo danh mục.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -112,8 +112,8 @@ public class CategoriesViewModel : ViewModelBase
             StatusMessage = $"Đang cập nhật danh mục: {SelectedCategory.Name}...";
             try
             {
-                var ok = await _apiClient.UpdateCategoryAsync(dialog.ResultUpdateDto);
-                if (ok)
+                var result = await _apiClient.UpdateCategoryAsync(dialog.ResultUpdateDto);
+                if (result.IsSuccess)
                 {
                     StatusMessage = $"Đã cập nhật danh mục: {dialog.ResultUpdateDto.Name}";
                     MessageBox.Show("Cập nhật danh mục thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -121,8 +121,8 @@ public class CategoriesViewModel : ViewModelBase
                 }
                 else
                 {
-                    StatusMessage = "Cập nhật danh mục thất bại.";
-                    MessageBox.Show("Không thể cập nhật danh mục.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusMessage = result.Error ?? "Cập nhật danh mục thất bại.";
+                    MessageBox.Show(result.Error ?? "Không thể cập nhật danh mục.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -158,8 +158,8 @@ public class CategoriesViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            var ok = await _apiClient.DeleteCategoryAsync(SelectedCategory.Id);
-            if (ok)
+            var result = await _apiClient.DeleteCategoryAsync(SelectedCategory.Id);
+            if (result.IsSuccess)
             {
                 Categories.Remove(SelectedCategory);
                 SelectedCategory = null;
@@ -168,8 +168,8 @@ public class CategoriesViewModel : ViewModelBase
             }
             else
             {
-                StatusMessage = "Xóa danh mục thất bại.";
-                MessageBox.Show("Không thể xóa danh mục.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = result.Error ?? "Xóa danh mục thất bại.";
+                MessageBox.Show(result.Error ?? "Không thể xóa danh mục.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)

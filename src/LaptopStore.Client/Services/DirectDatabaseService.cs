@@ -5,7 +5,9 @@ using LaptopStore.Application.DTOs.Customers;
 using LaptopStore.Application.DTOs.Orders;
 using LaptopStore.Application.DTOs.Products;
 using LaptopStore.Application.DTOs.Reports;
+using LaptopStore.Domain.Common;
 using LaptopStore.Application.Interfaces;
+using LaptopStore.Application.Security;
 using LaptopStore.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,8 +21,12 @@ public class DirectDatabaseService : IApiClient
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private string? _token;
-    private UserRole? _currentRole;
-    private int? _currentUserId;
+    private LoginResponseDto? _currentUser;
+
+    public LoginResponseDto? CurrentUser => _currentUser;
+
+    // Chế độ Direct DB không có token hết hạn giữa chừng nên không bao giờ phát sự kiện này
+    public event EventHandler? SessionExpired { add { } remove { } }
 
     public string ConnectionMode => "Direct Database Mode (Ứng dụng ➔ Database Server - Giai đoạn Giữa kỳ)";
     public bool IsDirectDatabaseMode => true;
@@ -43,12 +49,33 @@ public class DirectDatabaseService : IApiClient
     public void Logout()
     {
         _token = null;
-        _currentRole = null;
-        _currentUserId = null;
+        _currentUser = null;
     }
 
-    public async Task<LoginResponseDto?> LoginAsync(string username, string password)
+    /// <summary>
+    /// Ở chế độ Direct DB, client đóng vai trò "server" nên phải tự kiểm tra quyền như các [Authorize] của Web API.
+    /// </summary>
+    private string? PermissionError(AppPermission permission)
     {
+        if (_currentUser == null)
+            return "Vui lòng đăng nhập để sử dụng chức năng này.";
+
+        return RolePermissions.Has(_currentUser.Role, permission)
+            ? null
+            : $"Vai trò '{_currentUser.Role}' không có quyền thực hiện thao tác này.";
+    }
+
+    private void Require(AppPermission permission)
+    {
+        var error = PermissionError(permission);
+        if (error != null)
+            throw new UnauthorizedAccessException(error);
+    }
+
+    public async Task<Result<LoginResponseDto>> LoginAsync(string username, string password)
+    {
+        Logout();
+
         using var scope = _scopeFactory.CreateScope();
         var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
         var result = await authService.LoginAsync(new LoginRequestDto
@@ -60,12 +87,10 @@ public class DirectDatabaseService : IApiClient
         if (result.IsSuccess)
         {
             _token = result.Value.Token;
-            _currentRole = result.Value.Role;
-            _currentUserId = 1;
-            return result.Value;
+            _currentUser = result.Value;
         }
 
-        return null;
+        return result;
     }
 
     public async Task<List<ProductDto>> GetProductsAsync(string? keyword = null, int? categoryId = null)
@@ -87,28 +112,34 @@ public class DirectDatabaseService : IApiClient
         return await productService.GetByIdAsync(id);
     }
 
-    public async Task<bool> CreateProductAsync(CreateProductDto dto)
+    public async Task<Result> CreateProductAsync(CreateProductDto dto)
     {
+        if (PermissionError(AppPermission.ProductCreate) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
         var res = await productService.CreateAsync(dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> UpdateProductAsync(UpdateProductDto dto)
+    public async Task<Result> UpdateProductAsync(UpdateProductDto dto)
     {
+        if (PermissionError(AppPermission.ProductUpdate) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
         var res = await productService.UpdateAsync(dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> DeleteProductAsync(int id)
+    public async Task<Result> DeleteProductAsync(int id)
     {
+        if (PermissionError(AppPermission.ProductDelete) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
         var res = await productService.DeleteAsync(id);
-        return res.IsSuccess;
+        return res;
     }
 
     public async Task<List<CategoryDto>> GetCategoriesAsync()
@@ -125,32 +156,40 @@ public class DirectDatabaseService : IApiClient
         return await categoryService.GetByIdAsync(id);
     }
 
-    public async Task<bool> CreateCategoryAsync(CreateCategoryDto dto)
+    public async Task<Result> CreateCategoryAsync(CreateCategoryDto dto)
     {
+        if (PermissionError(AppPermission.CategoryCreate) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var categoryService = scope.ServiceProvider.GetRequiredService<ICategoryService>();
         var res = await categoryService.CreateAsync(dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> UpdateCategoryAsync(UpdateCategoryDto dto)
+    public async Task<Result> UpdateCategoryAsync(UpdateCategoryDto dto)
     {
+        if (PermissionError(AppPermission.CategoryUpdate) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var categoryService = scope.ServiceProvider.GetRequiredService<ICategoryService>();
         var res = await categoryService.UpdateAsync(dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> DeleteCategoryAsync(int id)
+    public async Task<Result> DeleteCategoryAsync(int id)
     {
+        if (PermissionError(AppPermission.CategoryDelete) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var categoryService = scope.ServiceProvider.GetRequiredService<ICategoryService>();
         var res = await categoryService.DeleteAsync(id);
-        return res.IsSuccess;
+        return res;
     }
 
     public async Task<List<CustomerDto>> GetCustomersAsync(string? keyword = null)
     {
+        Require(AppPermission.CustomerView);
+
         using var scope = _scopeFactory.CreateScope();
         var customerService = scope.ServiceProvider.GetRequiredService<ICustomerService>();
         return await customerService.GetAllAsync(keyword);
@@ -158,37 +197,47 @@ public class DirectDatabaseService : IApiClient
 
     public async Task<CustomerDto?> GetCustomerByIdAsync(int id)
     {
+        Require(AppPermission.CustomerView);
+
         using var scope = _scopeFactory.CreateScope();
         var customerService = scope.ServiceProvider.GetRequiredService<ICustomerService>();
         return await customerService.GetByIdAsync(id);
     }
 
-    public async Task<bool> CreateCustomerAsync(CreateCustomerDto dto)
+    public async Task<Result> CreateCustomerAsync(CreateCustomerDto dto)
     {
+        if (PermissionError(AppPermission.CustomerCreate) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var customerService = scope.ServiceProvider.GetRequiredService<ICustomerService>();
         var res = await customerService.CreateAsync(dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> UpdateCustomerAsync(UpdateCustomerDto dto)
+    public async Task<Result> UpdateCustomerAsync(UpdateCustomerDto dto)
     {
+        if (PermissionError(AppPermission.CustomerUpdate) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var customerService = scope.ServiceProvider.GetRequiredService<ICustomerService>();
         var res = await customerService.UpdateAsync(dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> DeleteCustomerAsync(int id)
+    public async Task<Result> DeleteCustomerAsync(int id)
     {
+        if (PermissionError(AppPermission.CustomerDelete) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var customerService = scope.ServiceProvider.GetRequiredService<ICustomerService>();
         var res = await customerService.DeleteAsync(id);
-        return res.IsSuccess;
+        return res;
     }
 
     public async Task<List<OrderDto>> GetCustomerOrdersAsync(int customerId)
     {
+        Require(AppPermission.CustomerView);
+
         using var scope = _scopeFactory.CreateScope();
         var customerService = scope.ServiceProvider.GetRequiredService<ICustomerService>();
         return await customerService.GetCustomerOrdersAsync(customerId);
@@ -196,6 +245,8 @@ public class DirectDatabaseService : IApiClient
 
     public async Task<List<OrderDto>> GetOrdersAsync()
     {
+        Require(AppPermission.OrderView);
+
         using var scope = _scopeFactory.CreateScope();
         var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
         return await orderService.GetAllAsync();
@@ -203,37 +254,47 @@ public class DirectDatabaseService : IApiClient
 
     public async Task<OrderDto?> GetOrderByIdAsync(int id)
     {
+        Require(AppPermission.OrderView);
+
         using var scope = _scopeFactory.CreateScope();
         var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
         return await orderService.GetByIdAsync(id);
     }
 
-    public async Task<OrderDto?> CreateOrderAsync(CreateOrderDto dto)
+    public async Task<Result<OrderDto>> CreateOrderAsync(CreateOrderDto dto)
     {
+        if (PermissionError(AppPermission.OrderCreate) is { } denied) return Result<OrderDto>.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
-        var res = await orderService.CreateOrderAsync(dto, _currentUserId);
-        return res.IsSuccess ? res.Value : null;
+        var res = await orderService.CreateOrderAsync(dto, _currentUser!.UserId);
+        return res;
     }
 
-    public async Task<bool> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto)
+    public async Task<Result> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto)
     {
+        if (PermissionError(AppPermission.OrderUpdateStatus) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
         var res = await orderService.UpdateStatusAsync(orderId, dto);
-        return res.IsSuccess;
+        return res;
     }
 
-    public async Task<bool> CancelOrderAsync(int orderId, string reason)
+    public async Task<Result> CancelOrderAsync(int orderId, string reason)
     {
+        if (PermissionError(AppPermission.OrderCancel) is { } denied) return Result.Failure(denied);
+
         using var scope = _scopeFactory.CreateScope();
         var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
         var res = await orderService.CancelOrderAsync(orderId, reason);
-        return res.IsSuccess;
+        return res;
     }
 
     public async Task<DashboardSummaryDto?> GetDashboardSummaryAsync()
     {
+        Require(AppPermission.ReportView);
+
         using var scope = _scopeFactory.CreateScope();
         var reportService = scope.ServiceProvider.GetRequiredService<IReportService>();
         return await reportService.GetDashboardSummaryAsync();
@@ -241,6 +302,8 @@ public class DirectDatabaseService : IApiClient
 
     public async Task<List<TopSellingProductDto>> GetTopSellingProductsAsync()
     {
+        Require(AppPermission.ReportView);
+
         using var scope = _scopeFactory.CreateScope();
         var reportService = scope.ServiceProvider.GetRequiredService<IReportService>();
         return await reportService.GetTopSellingProductsAsync(5);
@@ -248,6 +311,8 @@ public class DirectDatabaseService : IApiClient
 
     public async Task<List<ProductDto>> GetLowStockProductsAsync()
     {
+        Require(AppPermission.ProductViewLowStock);
+
         using var scope = _scopeFactory.CreateScope();
         var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
         return await productService.GetLowStockAsync();
@@ -255,8 +320,10 @@ public class DirectDatabaseService : IApiClient
 
     public async Task<AiQueryResponseDto?> AskAiAsync(string prompt)
     {
+        Require(AppPermission.AiAsk);
+
         using var scope = _scopeFactory.CreateScope();
         var aiService = scope.ServiceProvider.GetRequiredService<IAiAssistantService>();
-        return await aiService.ProcessUserPromptAsync(prompt, _currentUserId ?? 1, _currentRole ?? UserRole.Admin);
+        return await aiService.ProcessUserPromptAsync(prompt, _currentUser!.UserId, _currentUser.Role);
     }
 }

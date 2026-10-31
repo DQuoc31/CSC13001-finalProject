@@ -139,4 +139,91 @@ public class OrderTests
         Assert.True(result.IsFailure);
         Assert.Contains("phải lớn hơn 0", result.Error);
     }
+
+    private static async Task<(LaptopStore.Infrastructure.Persistence.LaptopStoreDbContext Context, Customer Customer, Product Product, OrderService Service, int OrderId)> CreatePendingOrderAsync()
+    {
+        var context = TestDbContextFactory.Create(Guid.NewGuid().ToString());
+        var customer = new Customer { FullName = "Trần Thị B", PhoneNumber = "0907778899", CustomerCode = "KH0002" };
+        var category = new Category { Name = "Laptop Văn Phòng", Slug = "laptop-van-phong" };
+        var product = new Product
+        {
+            Sku = "ORDER-TEST-CANCEL",
+            Name = "Dell XPS 13",
+            Brand = "Dell",
+            Model = "XPS 13",
+            Price = 25000000,
+            StockQuantity = 4,
+            CategoryId = 1
+        };
+
+        context.Customers.Add(customer);
+        context.Categories.Add(category);
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
+
+        var service = new OrderService(context);
+        var result = await service.CreateOrderAsync(new CreateOrderDto
+        {
+            CustomerId = customer.Id,
+            PaymentMethod = PaymentMethod.Cash,
+            Items = new List<CreateOrderItemDto> { new() { ProductId = product.Id, Quantity = 2 } }
+        });
+        Assert.True(result.IsSuccess);
+
+        return (context, customer, product, service, result.Value.Id);
+    }
+
+    [Fact]
+    public async Task Order_04_CancelOrder_RestoresStockAndRevertsCustomerSpendingAndPoints()
+    {
+        // Arrange
+        var (context, customer, product, service, orderId) = await CreatePendingOrderAsync();
+        using var _ = context;
+        Assert.Equal(50000000, customer.TotalSpent);  // 25tr * 2
+        Assert.Equal(500, customer.RewardPoints);    // 100k = 1 điểm
+
+        // Act
+        var cancel = await service.CancelOrderAsync(orderId, "Khách đổi ý");
+
+        // Assert
+        Assert.True(cancel.IsSuccess);
+        Assert.Equal(4, product.StockQuantity);
+        Assert.Equal(0, customer.TotalSpent);
+        Assert.Equal(0, customer.RewardPoints);
+    }
+
+    [Fact]
+    public async Task Order_05_CompletedOrder_CannotBeCancelled()
+    {
+        // Arrange
+        var (context, _, product, service, orderId) = await CreatePendingOrderAsync();
+        using var _ctx = context;
+        await service.UpdateStatusAsync(orderId, new UpdateOrderStatusDto { Status = OrderStatus.Completed });
+
+        // Act
+        var cancel = await service.CancelOrderAsync(orderId, "Thử hủy");
+
+        // Assert
+        Assert.True(cancel.IsFailure);
+        Assert.Contains("đã hoàn tất", cancel.Error);
+        Assert.Equal(2, product.StockQuantity);
+    }
+
+    [Fact]
+    public async Task Order_06_CancelledOrder_CannotChangeStatusOrBeCancelledViaStatusUpdate()
+    {
+        // Arrange
+        var (context, _, _, service, orderId) = await CreatePendingOrderAsync();
+        using var _ctx = context;
+
+        // Act: hủy qua UpdateStatus phải bị chặn (không hoàn kho)
+        var cancelViaStatus = await service.UpdateStatusAsync(orderId, new UpdateOrderStatusDto { Status = OrderStatus.Cancelled });
+        await service.CancelOrderAsync(orderId, "Khách đổi ý");
+        var reopen = await service.UpdateStatusAsync(orderId, new UpdateOrderStatusDto { Status = OrderStatus.Processing });
+
+        // Assert
+        Assert.True(cancelViaStatus.IsFailure);
+        Assert.True(reopen.IsFailure);
+        Assert.Contains("đã bị hủy", reopen.Error);
+    }
 }

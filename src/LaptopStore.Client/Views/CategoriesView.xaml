@@ -3,45 +3,92 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
-    <Grid Margin="20">
+             xmlns:ctl="clr-namespace:LaptopStore.Client.Controls"
+             mc:Ignorable="d" d:DesignHeight="760" d:DesignWidth="1150">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Tiêu đề & Thao tác nhanh -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+        <!-- Tiêu đề -->
+        <DockPanel Margin="0,0,0,20">
             <StackPanel>
-                <TextBlock Text="📁 Quản Lý Danh Mục Sản Phẩm" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
-                <TextBlock Text="Phân nhóm thiết bị laptop, linh kiện và phụ kiện" FontSize="13" Foreground="#64748B" Margin="0,2,0,0"/>
+                <TextBlock Text="Danh mục" Style="{StaticResource Text.H1}"/>
+                <TextBlock Style="{StaticResource Text.Sub}">
+                    <Run Text="{Binding Categories.Count, Mode=OneWay}"/><Run Text=" nhóm thiết bị · Chọn một thẻ để sửa hoặc xóa, nhấp đúp để sửa nhanh"/>
+                </TextBlock>
             </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="➕ Thêm Danh Mục" Padding="14,6" Margin="4,0" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="Bold"
-                        Command="{Binding AddCategoryCommand}"/>
-                <Button Content="✏️ Sửa Danh Mục" Padding="14,6" Margin="4,0" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                        Command="{Binding EditCategoryCommand}"/>
-                <Button Content="🗑️ Xóa Danh Mục" Padding="12,6" Margin="4,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                        Command="{Binding DeleteCategoryCommand}"/>
-                <Button Content="🔄 Tải lại" Padding="12,6" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
-                        Command="{Binding LoadCommand}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Button Content="Tải lại" ctl:Ui.Icon="{StaticResource Icon.Refresh}" Command="{Binding LoadCommand}" Margin="0,0,8,0"/>
+                <Button Content="Sửa" ctl:Ui.Icon="{StaticResource Icon.Edit}" Command="{Binding EditCategoryCommand}" Margin="0,0,8,0"/>
+                <Button Style="{StaticResource Btn.Danger}" Content="Xóa" ctl:Ui.Icon="{StaticResource Icon.Trash}" Command="{Binding DeleteCategoryCommand}" Margin="0,0,8,0"/>
+                <Button Style="{StaticResource Btn.Primary}" Content="Thêm danh mục" ctl:Ui.Icon="{StaticResource Icon.Plus}" Command="{Binding AddCategoryCommand}"/>
             </StackPanel>
         </DockPanel>
 
-        <!-- Bảng danh sách danh mục -->
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
-                  AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                  HeadersVisibility="Column" Background="White" RowHeight="42">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Mã ID" Binding="{Binding Id}" Width="80"/>
-                <DataGridTextColumn Header="Tên Danh Mục" Binding="{Binding Name}" Width="220" FontWeight="SemiBold"/>
-                <DataGridTextColumn Header="Đường Dẫn Slug" Binding="{Binding Slug}" Width="180"/>
-                <DataGridTextColumn Header="Thứ Tự" Binding="{Binding DisplayOrder}" Width="80"/>
-                <DataGridTextColumn Header="Số Lượng Sản Phẩm" Binding="{Binding ProductCount, StringFormat={}{0} máy/linh kiện}" Width="160"/>
-                <DataGridTextColumn Header="Mô Tả Chi Tiết" Binding="{Binding Description}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Row="1">
+            <ListBox Style="{StaticResource CardList}" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+                     Margin="-8" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditCategoryCommand}"/>
+                </ListBox.InputBindings>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border x:Name="Bd" Style="{StaticResource Card}" Margin="8" Padding="18">
+                            <DockPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Border Width="42" Height="42" CornerRadius="12" Background="{Binding Name, Converter={StaticResource ThumbBrush}, ConverterParameter=bg}">
+                                        <ctl:Icon Data="{StaticResource Icon.Folder}" Width="20" Height="20"
+                                                  Foreground="{Binding Name, Converter={StaticResource ThumbBrush}, ConverterParameter=fg}"/>
+                                    </Border>
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource Tag}" Margin="0">
+                                        <TextBlock Text="{Binding DisplayOrder, StringFormat=Thứ tự {0}}" FontSize="11.5" Foreground="{StaticResource Brush.Muted}"/>
+                                    </Border>
+                                </DockPanel>
+                                <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource Brush.Line2}" BorderThickness="0,1,0,0" Margin="0,14,0,0" Padding="0,12,0,0">
+                                    <DockPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <ctl:Icon Data="{StaticResource Icon.Laptop}" Width="15" Height="15" Foreground="{StaticResource Brush.Accent}" Margin="0,0,7,0"/>
+                                            <TextBlock FontWeight="SemiBold">
+                                                <Run Text="{Binding ProductCount, Mode=OneWay}"/><Run Text=" sản phẩm" FontWeight="Normal" Foreground="{StaticResource Brush.Muted}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Slug}" Style="{StaticResource Text.Mono}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                                    </DockPanel>
+                                </Border>
+                                <StackPanel Margin="0,14,0,0">
+                                    <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding Description, TargetNullValue='Chưa có mô tả'}" Style="{StaticResource Text.Muted}" FontSize="12.5"
+                                               TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Height="38" Margin="0,4,0,0" LineHeight="19"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#BFDBFE"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Brush.Accent}"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="Bd" Property="Padding" Value="17"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Style="{StaticResource EmptyState}"
+                        Visibility="{Binding Categories.Count, Converter={StaticResource Vis}, ConverterParameter=invert}">
+                <ctl:Icon Data="{StaticResource Icon.Folder}" Width="30" Height="30" Foreground="{StaticResource Brush.Faint}"/>
+                <TextBlock Text="Chưa có danh mục nào" FontWeight="SemiBold" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

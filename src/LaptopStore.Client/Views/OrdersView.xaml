@@ -3,103 +3,271 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1100">
-    <Grid Margin="20">
+             xmlns:ctl="clr-namespace:LaptopStore.Client.Controls"
+             mc:Ignorable="d" d:DesignHeight="760" d:DesignWidth="1150">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Tiêu đề & Thao tác nhanh -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+        <!-- Tiêu đề -->
+        <DockPanel Margin="0,0,0,20">
             <StackPanel>
-                <TextBlock Text="🧾 Quản Lý Đơn Hàng &amp; Bán Hàng" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
-                <TextBlock Text="Theo dõi trạng thái đơn hàng, kiểm tra chi tiết và lập đơn bán mới" FontSize="13" Foreground="#64748B" Margin="0,2,0,0"/>
+                <TextBlock Text="Đơn hàng" Style="{StaticResource Text.H1}"/>
+                <TextBlock Text="Theo dõi vòng đời đơn, cập nhật trạng thái và hoàn kho khi hủy" Style="{StaticResource Text.Sub}"/>
             </StackPanel>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="➕ Lập Đơn Hàng Mới" Padding="16,7" Margin="4,0" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="Bold"
-                        Command="{Binding CreateOrderCommand}"/>
-                <Button Content="🔄 Tải lại danh sách" Padding="12,7" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
-                        Command="{Binding LoadOrdersCommand}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Button Content="Tải lại" ctl:Ui.Icon="{StaticResource Icon.Refresh}" Command="{Binding LoadOrdersCommand}" Margin="0,0,8,0"/>
+                <Button Style="{StaticResource Btn.Primary}" Content="Lập đơn mới" ctl:Ui.Icon="{StaticResource Icon.Plus}" Command="{Binding CreateOrderCommand}"/>
             </StackPanel>
         </DockPanel>
 
-        <!-- Bảng danh sách đơn hàng & Panel chi tiết đơn hàng -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Bảng danh sách đơn hàng -->
-            <DataGrid Grid.Column="0" ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}"
-                      AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column" Background="White" RowHeight="38" Margin="0,0,16,0">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã Đơn" Binding="{Binding OrderNumber}" Width="120" FontWeight="SemiBold"/>
-                    <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="150"/>
-                    <DataGridTextColumn Header="SĐT" Binding="{Binding CustomerPhone}" Width="110"/>
-                    <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding FinalAmount, StringFormat={}{0:N0} đ}" Width="130" FontWeight="Bold"/>
-                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="105"/>
-                    <DataGridTextColumn Header="Thanh Toán" Binding="{Binding PaymentStatus}" Width="105"/>
-                    <DataGridTextColumn Header="Ngày Tạo" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="135"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <!-- Danh sách đơn -->
+            <Border Style="{StaticResource Card}" ClipToBounds="True">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,0,0,1" Padding="4,0">
+                        <ListBox Style="{StaticResource TabList}" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Label}"/>
+                                        <Border CornerRadius="10" Padding="7,0" Margin="7,0,0,0" Background="#EEF1F5" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Count}" FontSize="11" Foreground="{StaticResource Brush.Muted}"/>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
 
-            <!-- Panel Chi tiết đơn hàng và cập nhật trạng thái -->
-            <Border Grid.Column="1" Background="#F8FAFC" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <Border DockPanel.Dock="Top" Padding="16,12" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,0,0,1">
+                        <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="340" HorizontalAlignment="Left"
+                                 ctl:Ui.Icon="{StaticResource Icon.Search}" ctl:Ui.Placeholder="Mã đơn, tên hoặc SĐT khách…"/>
+                    </Border>
 
-                    <!-- Thông tin tổng quát đơn hàng -->
-                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
-                        <TextBlock Text="📋 Chi Tiết Hóa Đơn Bán Hàng" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding SelectedOrder.OrderNumber, TargetNullValue='(Chưa chọn đơn hàng)'}" FontSize="15" FontWeight="Bold" Foreground="#2563EB"/>
-                        <TextBlock Text="{Binding SelectedOrder.CustomerName, StringFormat={}Khách hàng: {0}}" FontSize="13" Foreground="#334155" Margin="0,2,0,0"/>
-                        <TextBlock Text="{Binding SelectedOrder.CustomerPhone, StringFormat={}SĐT liên hệ: {0}}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
-                        <TextBlock Text="{Binding SelectedOrder.FinalAmount, StringFormat={}Tổng thanh toán: {0:N0} VNĐ}" FontSize="14" FontWeight="Bold" Foreground="#10B981" Margin="0,4,0,0"/>
-                        <TextBlock Text="{Binding SelectedOrder.Status, StringFormat={}Trạng thái hiện tại: {0}}" FontSize="12" FontWeight="SemiBold" Foreground="#D97706" Margin="0,2,0,0"/>
-                    </StackPanel>
-
-                    <Separator Grid.Row="1" Margin="0,0,0,12"/>
-
-                    <!-- Danh sách sản phẩm bên trong đơn hàng -->
-                    <DockPanel Grid.Row="2" Margin="0,0,0,12">
-                        <TextBlock DockPanel.Dock="Top" Text="📦 Các Sản Phẩm Đã Mua" FontSize="13" FontWeight="Bold" Foreground="#475569" Margin="0,0,0,6"/>
-                        <DataGrid ItemsSource="{Binding SelectedOrderItems}" AutoGenerateColumns="False" IsReadOnly="True"
-                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White" RowHeight="32">
+                    <Grid>
+                        <DataGrid ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}" RowHeight="56">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Mã SKU" Binding="{Binding ProductSku}" Width="100"/>
-                                <DataGridTextColumn Header="Tên Sản Phẩm" Binding="{Binding ProductName}" Width="*"/>
-                                <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="45"/>
-                                <DataGridTextColumn Header="Đơn Giá" Binding="{Binding UnitPrice, StringFormat={}{0:N0} đ}" Width="95"/>
-                                <DataGridTextColumn Header="Thành Tiền" Binding="{Binding SubTotal, StringFormat={}{0:N0} đ}" Width="100" FontWeight="SemiBold"/>
+                                <DataGridTemplateColumn Header="Mã đơn" Width="160">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding OrderNumber}" FontFamily="{StaticResource Font.Mono}" FontWeight="SemiBold" FontSize="12.5" TextTrimming="CharacterEllipsis"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Khách hàng" Width="*" MinWidth="170">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <ContentControl Width="30" Height="30" Content="{Binding CustomerName}" ContentTemplate="{StaticResource AvatarTemplate}" Margin="0,0,10,0"/>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding CustomerName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding CustomerPhone}" Style="{StaticResource Text.Muted}" FontSize="11.5"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Ngày tạo" Binding="{Binding CreatedAt, StringFormat={}{0:dd/MM · HH:mm}}" Width="112">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Thành tiền" Binding="{Binding FinalAmount, StringFormat={}{0:N0} đ}" Width="124"
+                                                    ElementStyle="{StaticResource Cell.Right}" HeaderStyle="{StaticResource Header.Right}"/>
+                                <DataGridTemplateColumn Header="Trạng thái" Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ContentControl Content="{Binding Status}" ContentTemplate="{StaticResource PillTemplate}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                    </DockPanel>
 
-                    <!-- Thao tác thay đổi trạng thái đơn hàng -->
-                    <Border Grid.Row="3" Background="White" CornerRadius="6" Padding="12" BorderBrush="#E2E8F0" BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="⚙️ Cập Nhật Trạng Thái Đơn Hàng" FontWeight="Bold" FontSize="12" Foreground="#334155" Margin="0,0,0,8"/>
-                            <UniformGrid Columns="2" Margin="0,0,0,6">
-                                <Button Content="🚚 Đang Xử Lý" Padding="8,5" Margin="2" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                                        Command="{Binding UpdateStatusCommand}" CommandParameter="Processing"/>
-                                <Button Content="✅ Hoàn Thành" Padding="8,5" Margin="2" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                                        Command="{Binding UpdateStatusCommand}" CommandParameter="Completed"/>
-                            </UniformGrid>
-                            <Button Content="❌ Hủy Đơn Hàng (Hoàn Tồn Kho)" Padding="10,6" Margin="2,4,2,0" Background="#FEE2E2" Foreground="#DC2626"
-                                    BorderBrush="#FCA5A5" BorderThickness="1" FontWeight="Bold"
-                                    Command="{Binding CancelOrderCommand}"/>
+                        <StackPanel Style="{StaticResource EmptyState}"
+                                    Visibility="{Binding Orders.Count, Converter={StaticResource Vis}, ConverterParameter=invert}">
+                            <ctl:Icon Data="{StaticResource Icon.Receipt}" Width="30" Height="30" Foreground="{StaticResource Brush.Faint}"/>
+                            <TextBlock Text="Không có đơn hàng nào" FontWeight="SemiBold" Margin="0,10,0,2" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Đổi tab trạng thái hoặc từ khoá tìm kiếm." Style="{StaticResource Text.Muted}" HorizontalAlignment="Center"/>
                         </StackPanel>
-                    </Border>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Chi tiết đơn -->
+            <Border Grid.Column="2" Style="{StaticResource Card}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel Style="{StaticResource EmptyState}"
+                                Visibility="{Binding SelectedOrder, Converter={StaticResource Vis}, ConverterParameter=invert}">
+                        <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource Brush.AccentSoft}" HorizontalAlignment="Center">
+                            <ctl:Icon Data="{StaticResource Icon.Receipt}" Width="26" Height="26" Foreground="{StaticResource Brush.Accent}"/>
+                        </Border>
+                        <TextBlock Text="Chọn một đơn hàng" FontWeight="SemiBold" FontSize="14" Margin="0,14,0,4" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Sản phẩm, tiến trình xử lý và thao tác cập nhật trạng thái sẽ hiển thị tại đây."
+                                   Style="{StaticResource Text.Muted}" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="240"/>
+                    </StackPanel>
+
+                    <DockPanel Visibility="{Binding SelectedOrder, Converter={StaticResource Vis}}">
+                        <!-- Thao tác -->
+                        <Border DockPanel.Dock="Bottom" Padding="18,14" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0">
+                            <StackPanel>
+                                <Button Style="{StaticResource Btn.Primary}" Content="{Binding NextStatusLabel}" ctl:Ui.Icon="{StaticResource Icon.Check}"
+                                        Command="{Binding UpdateStatusCommand}" CommandParameter="{Binding NextStatusKey}"
+                                        Visibility="{Binding NextStatusKey, Converter={StaticResource Vis}}" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="6"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="6"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="6"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="Xử lý" Height="32" Padding="6,0" FontSize="12" ctl:Ui.Icon="{StaticResource Icon.Clock}"
+                                            Command="{Binding UpdateStatusCommand}" CommandParameter="Processing" ToolTip="Đặt trạng thái: Đang xử lý"/>
+                                    <Button Grid.Column="2" Content="Giao" Height="32" Padding="6,0" FontSize="12" ctl:Ui.Icon="{StaticResource Icon.Truck}"
+                                            Command="{Binding UpdateStatusCommand}" CommandParameter="Shipping" ToolTip="Đặt trạng thái: Đang giao"/>
+                                    <Button Grid.Column="4" Content="Xong" Height="32" Padding="6,0" FontSize="12" ctl:Ui.Icon="{StaticResource Icon.Check}"
+                                            Command="{Binding UpdateStatusCommand}" CommandParameter="Completed" ToolTip="Đặt trạng thái: Hoàn thành"/>
+                                    <Button Grid.Column="6" Style="{StaticResource Btn.Danger}" Content="Hủy" Height="32" Padding="6,0" FontSize="12"
+                                            ctl:Ui.Icon="{StaticResource Icon.X}" Command="{Binding CancelOrderCommand}" ToolTip="Hủy đơn và hoàn trả tồn kho"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <!-- Đầu phiếu -->
+                                <StackPanel Margin="18,18,18,14">
+                                    <DockPanel>
+                                        <TextBlock Text="{Binding SelectedOrder.OrderNumber}" FontFamily="{StaticResource Font.Mono}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
+                                        <ContentControl Content="{Binding SelectedOrder.Status}" ContentTemplate="{StaticResource PillTemplate}" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                                    </DockPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                        <ContentControl Width="34" Height="34" Content="{Binding SelectedOrder.CustomerName}" ContentTemplate="{StaticResource AvatarTemplate}" Margin="0,0,10,0"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SelectedOrder.CustomerName}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding SelectedOrder.CustomerPhone}" Style="{StaticResource Text.Muted}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border Style="{StaticResource Divider}"/>
+
+                                <!-- Dòng thời gian -->
+                                <ItemsControl ItemsSource="{Binding SelectedOrderSteps}" Margin="18,16,18,6">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="28"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle x:Name="Line" Width="2" Fill="{StaticResource Brush.Line}" Margin="0,28,0,0" HorizontalAlignment="Center"/>
+                                                <Border x:Name="Dot" Width="28" Height="28" CornerRadius="14" VerticalAlignment="Top" Background="{StaticResource Brush.OkSoft}">
+                                                    <ctl:Icon x:Name="DotIcon" Data="{StaticResource Icon.Check}" Width="14" Height="14" Foreground="{StaticResource Brush.Ok}"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="12,4,0,14">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Text.Muted}" Margin="0,1,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding State}" Value="current">
+                                                    <Setter TargetName="Dot" Property="Background" Value="{StaticResource Brush.Accent}"/>
+                                                    <Setter TargetName="DotIcon" Property="Data" Value="{StaticResource Icon.Clock}"/>
+                                                    <Setter TargetName="DotIcon" Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding State}" Value="todo">
+                                                    <Setter TargetName="Dot" Property="Background" Value="#F1F5F9"/>
+                                                    <Setter TargetName="DotIcon" Property="Data" Value="{StaticResource Icon.Truck}"/>
+                                                    <Setter TargetName="DotIcon" Property="Foreground" Value="{StaticResource Brush.Faint}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding State}" Value="cancel">
+                                                    <Setter TargetName="Dot" Property="Background" Value="{StaticResource Brush.BadSoft}"/>
+                                                    <Setter TargetName="DotIcon" Property="Data" Value="{StaticResource Icon.X}"/>
+                                                    <Setter TargetName="DotIcon" Property="Foreground" Value="{StaticResource Brush.Bad}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                    <Setter TargetName="Line" Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Style="{StaticResource Divider}"/>
+
+                                <!-- Sản phẩm -->
+                                <TextBlock Text="SẢN PHẨM" Style="{StaticResource Text.Caps}" Margin="18,14,18,4"/>
+                                <ItemsControl ItemsSource="{Binding SelectedOrderItems}" Margin="18,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource Brush.Line2}" BorderThickness="0,0,0,1" Padding="0,9">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" FontSize="12.5" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Style="{StaticResource Text.Muted}" FontSize="11.5">
+                                                            <Run Text="{Binding Quantity, Mode=OneWay}"/><Run Text=" × "/><Run Text="{Binding UnitPrice, Mode=OneWay, StringFormat={}{0:N0} đ}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding SubTotal, StringFormat={}{0:N0} đ}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Tổng tiền -->
+                                <StackPanel Margin="18,12,18,16">
+                                    <DockPanel Margin="0,2">
+                                        <TextBlock Text="Tạm tính" Foreground="{StaticResource Brush.Muted}"/>
+                                        <TextBlock Text="{Binding SelectedOrder.TotalAmount, StringFormat={}{0:N0} đ}" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                    <DockPanel Margin="0,2">
+                                        <TextBlock Text="Giảm giá" Foreground="{StaticResource Brush.Muted}"/>
+                                        <TextBlock Text="{Binding SelectedOrder.DiscountAmount, StringFormat=− {0:N0} đ}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Ok}" HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                    <Border BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0" Margin="0,8,0,0" Padding="0,10,0,0">
+                                        <DockPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="Khách trả" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding PaymentText}" Style="{StaticResource Text.Muted}" FontSize="11.5"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SelectedOrder.FinalAmount, StringFormat={}{0:N0} đ}" FontSize="18" FontWeight="Bold"
+                                                       Foreground="{StaticResource Brush.AccentInk}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0"
+                                                Visibility="{Binding SelectedOrder.ShippingAddress, Converter={StaticResource Vis}}">
+                                        <ctl:Icon Data="{StaticResource Icon.Pin}" Width="14" Height="14" Foreground="{StaticResource Brush.Faint}" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                                        <TextBlock Text="{Binding SelectedOrder.ShippingAddress}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" MaxWidth="300"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                                Visibility="{Binding SelectedOrder.CustomerNote, Converter={StaticResource Vis}}">
+                                        <ctl:Icon Data="{StaticResource Icon.Edit}" Width="14" Height="14" Foreground="{StaticResource Brush.Faint}" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                                        <TextBlock Text="{Binding SelectedOrder.CustomerNote}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" MaxWidth="300"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
                 </Grid>
             </Border>
         </Grid>

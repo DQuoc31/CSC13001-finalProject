@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using LaptopStore.Application.DTOs.Orders;
+using LaptopStore.Client.Converters;
 using LaptopStore.Client.Services;
 using LaptopStore.Client.Views;
 using LaptopStore.Domain.Enums;
@@ -8,10 +9,74 @@ using System.Windows;
 
 namespace LaptopStore.Client.ViewModels;
 
+/// <summary>Tab lọc theo trạng thái đơn hàng (Status = null nghĩa là tất cả).</summary>
+public class OrderTab
+{
+    public OrderStatus? Status { get; set; }
+    public string Label { get; set; } = string.Empty;
+    public int Count { get; set; }
+}
+
+/// <summary>Một bước trên dòng thời gian xử lý đơn. State: done / current / todo / cancel.</summary>
+public class OrderStep
+{
+    public string Title { get; set; } = string.Empty;
+    public string Subtitle { get; set; } = string.Empty;
+    public string State { get; set; } = "todo";
+    public bool IsLast { get; set; }
+}
+
 public class OrdersViewModel : ViewModelBase
 {
     private readonly IApiClient _apiClient;
     private OrderDto? _selectedOrder;
+    private List<OrderDto> _allOrders = new();
+    private string _searchKeyword = string.Empty;
+    private OrderTab? _selectedTab;
+
+    /// <summary>Phát ra khi người dùng muốn lập đơn mới — trang chính sẽ mở POS.</summary>
+    public event Action? CreateOrderRequested;
+
+    public string SearchKeyword
+    {
+        get => _searchKeyword;
+        set
+        {
+            if (SetProperty(ref _searchKeyword, value)) ApplyFilter();
+        }
+    }
+
+    public OrderTab? SelectedTab
+    {
+        get => _selectedTab;
+        set
+        {
+            if (SetProperty(ref _selectedTab, value)) ApplyFilter();
+        }
+    }
+
+    public ObservableCollection<OrderTab> Tabs { get; } = new();
+    public ObservableCollection<OrderStep> SelectedOrderSteps { get; } = new();
+
+    /// <summary>Trạng thái kế tiếp hợp lệ của đơn đang chọn (dùng cho nút thao tác chính).</summary>
+    public string? NextStatusKey => SelectedOrder?.Status switch
+    {
+        OrderStatus.Pending => nameof(OrderStatus.Processing),
+        OrderStatus.Processing => nameof(OrderStatus.Shipping),
+        OrderStatus.Shipping => nameof(OrderStatus.Completed),
+        _ => null
+    };
+
+    public string NextStatusLabel => SelectedOrder?.Status switch
+    {
+        OrderStatus.Pending => "Xác nhận & xử lý",
+        OrderStatus.Processing => "Chuyển sang Đang giao",
+        OrderStatus.Shipping => "Hoàn thành đơn",
+        _ => string.Empty
+    };
+
+    public string PaymentText => SelectedOrder == null ? string.Empty
+        : $"{Display.PaymentMethodText(SelectedOrder.PaymentMethod)} · {Display.PaymentStatusText(SelectedOrder.PaymentStatus)}";
 
     public OrderDto? SelectedOrder
     {
@@ -22,6 +87,10 @@ public class OrdersViewModel : ViewModelBase
             {
                 UpdateStatusCommand.NotifyCanExecuteChanged();
                 CancelOrderCommand.NotifyCanExecuteChanged();
+                OnPropertyChanged(nameof(NextStatusKey));
+                OnPropertyChanged(nameof(NextStatusLabel));
+                OnPropertyChanged(nameof(PaymentText));
+                BuildSteps();
                 _ = LoadOrderDetailsAsync();
             }
         }
@@ -39,9 +108,15 @@ public class OrdersViewModel : ViewModelBase
     {
         _apiClient = apiClient;
         LoadOrdersCommand = new AsyncRelayCommand(LoadOrdersAsync);
-        CreateOrderCommand = new AsyncRelayCommand(CreateOrderAsync);
-        UpdateStatusCommand = new AsyncRelayCommand<string>(UpdateStatusAsync, s => SelectedOrder != null);
-        CancelOrderCommand = new AsyncRelayCommand(CancelOrderAsync, () => SelectedOrder != null && SelectedOrder.Status != OrderStatus.Cancelled);
+        CreateOrderCommand = new AsyncRelayCommand(() =>
+        {
+            CreateOrderRequested?.Invoke();
+            return Task.CompletedTask;
+        });
+        UpdateStatusCommand = new AsyncRelayCommand<string>(UpdateStatusAsync,
+            s => SelectedOrder != null && SelectedOrder.Status != OrderStatus.Cancelled && SelectedOrder.Status != OrderStatus.Completed);
+        CancelOrderCommand = new AsyncRelayCommand(CancelOrderAsync,
+            () => SelectedOrder != null && SelectedOrder.Status != OrderStatus.Cancelled && SelectedOrder.Status != OrderStatus.Completed);
     }
 
     public async Task LoadOrdersAsync()
@@ -50,13 +125,13 @@ public class OrdersViewModel : ViewModelBase
         StatusMessage = "Đang tải danh sách đơn hàng...";
         try
         {
-            var list = await _apiClient.GetOrdersAsync();
-            Orders.Clear();
-            foreach (var o in list)
-            {
-                Orders.Add(o);
-            }
-            StatusMessage = $"Đã tải {Orders.Count} đơn hàng.";
+            var selectedId = SelectedOrder?.Id;
+            _allOrders = await _apiClient.GetOrdersAsync();
+            RebuildTabs();
+            ApplyFilter();
+            if (selectedId != null)
+                SelectedOrder = Orders.FirstOrDefault(o => o.Id == selectedId);
+            StatusMessage = $"Đã tải {_allOrders.Count} đơn hàng.";
         }
         catch (Exception ex)
         {
@@ -66,6 +141,84 @@ public class OrdersViewModel : ViewModelBase
         {
             IsBusy = false;
         }
+    }
+
+    private void RebuildTabs()
+    {
+        var current = SelectedTab?.Status;
+        var tabs = new List<OrderTab> { new() { Status = null, Label = "Tất cả", Count = _allOrders.Count } };
+        foreach (var status in new[] { OrderStatus.Pending, OrderStatus.Processing, OrderStatus.Shipping, OrderStatus.Completed, OrderStatus.Cancelled })
+        {
+            tabs.Add(new OrderTab
+            {
+                Status = status,
+                Label = Display.OrderStatusText(status),
+                Count = _allOrders.Count(o => o.Status == status)
+            });
+        }
+
+        Tabs.Clear();
+        foreach (var t in tabs) Tabs.Add(t);
+        _selectedTab = Tabs.FirstOrDefault(t => t.Status == current) ?? Tabs[0];
+        OnPropertyChanged(nameof(SelectedTab));
+    }
+
+    private void ApplyFilter()
+    {
+        var keyword = SearchKeyword.Trim();
+        var query = _allOrders.AsEnumerable();
+        if (SelectedTab?.Status is OrderStatus status) query = query.Where(o => o.Status == status);
+        if (keyword.Length > 0)
+        {
+            query = query.Where(o =>
+                o.OrderNumber.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                o.CustomerName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                o.CustomerPhone.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var selectedId = SelectedOrder?.Id;
+        Orders.Clear();
+        foreach (var o in query.OrderByDescending(o => o.CreatedAt)) Orders.Add(o);
+        if (selectedId != null && Orders.All(o => o.Id != selectedId)) SelectedOrder = null;
+    }
+
+    /// <summary>Dựng dòng thời gian xử lý từ trạng thái hiện tại của đơn.</summary>
+    private void BuildSteps()
+    {
+        SelectedOrderSteps.Clear();
+        var order = SelectedOrder;
+        if (order == null) return;
+
+        var created = $"{order.CreatedAt:dd'/'MM · HH:mm}"
+            + (string.IsNullOrEmpty(order.CreatedByUserName) ? "" : $" · {order.CreatedByUserName}");
+
+        if (order.Status == OrderStatus.Cancelled)
+        {
+            SelectedOrderSteps.Add(new OrderStep { Title = "Tạo đơn", Subtitle = created, State = "done" });
+            SelectedOrderSteps.Add(new OrderStep { Title = "Đã hủy", Subtitle = "Số lượng đã được hoàn lại kho", State = "cancel", IsLast = true });
+            return;
+        }
+
+        int rank = (int)order.Status; // Pending = 1 … Completed = 4
+        var steps = new (string Title, int Rank)[] { ("Tạo đơn", 1), ("Đang xử lý", 2), ("Đang giao", 3), ("Hoàn thành", 4) };
+        foreach (var (title, stepRank) in steps)
+        {
+            string state = rank > stepRank || (rank == 4 && stepRank == 4) ? "done"
+                : rank == stepRank ? "current" : "todo";
+            string subtitle = stepRank switch
+            {
+                1 => created,
+                4 when order.CompletedAt != null => $"{order.CompletedAt:dd'/'MM · HH:mm}",
+                _ => state switch { "current" => "Đang thực hiện", "todo" => "Chưa bắt đầu", _ => "Đã xong" }
+            };
+            SelectedOrderSteps.Add(new OrderStep
+            {
+                Title = stepRank == 1 && state == "current" ? "Chờ xác nhận" : title,
+                Subtitle = subtitle,
+                State = state
+            });
+        }
+        SelectedOrderSteps[^1].IsLast = true;
     }
 
     private async Task LoadOrderDetailsAsync()
@@ -90,49 +243,6 @@ public class OrdersViewModel : ViewModelBase
         }
     }
 
-    private async Task CreateOrderAsync()
-    {
-        IsBusy = true;
-        StatusMessage = "Đang chuẩn bị dữ liệu sản phẩm & khách hàng...";
-        try
-        {
-            var customers = await _apiClient.GetCustomersAsync();
-            var products = await _apiClient.GetProductsAsync();
-
-            var dialog = new CreateOrderWindow(customers, products);
-            dialog.Owner = System.Windows.Application.Current.MainWindow;
-            if (dialog.ShowDialog() == true && dialog.ResultOrderDto != null)
-            {
-                StatusMessage = "Đang lập đơn hàng và kiểm tra tồn kho...";
-                var createdOrder = await _apiClient.CreateOrderAsync(dialog.ResultOrderDto);
-                if (createdOrder != null)
-                {
-                    StatusMessage = $"Tạo đơn hàng {createdOrder.OrderNumber} thành công!";
-                    MessageBox.Show(
-                        $"Đơn hàng {createdOrder.OrderNumber} đã được lập thành công!\nTổng tiền: {createdOrder.FinalAmount:N0} VNĐ\nKho hàng đã được cập nhật tương ứng.",
-                        "Lập đơn hàng thành công",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                    await LoadOrdersAsync();
-                }
-                else
-                {
-                    StatusMessage = "Lập đơn hàng thất bại. Kiểm tra số lượng tồn kho hoặc dữ liệu.";
-                    MessageBox.Show("Không thể tạo đơn hàng. Vui lòng kiểm tra lại số lượng tồn kho.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Lỗi: {ex.Message}";
-            MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi hệ thống", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
     private async Task UpdateStatusAsync(string? statusStr)
     {
         if (SelectedOrder == null || string.IsNullOrWhiteSpace(statusStr)) return;
@@ -143,13 +253,13 @@ public class OrdersViewModel : ViewModelBase
         StatusMessage = $"Đang cập nhật trạng thái đơn {SelectedOrder.OrderNumber}...";
         try
         {
-            var ok = await _apiClient.UpdateOrderStatusAsync(SelectedOrder.Id, new UpdateOrderStatusDto
+            var result = await _apiClient.UpdateOrderStatusAsync(SelectedOrder.Id, new UpdateOrderStatusDto
             {
                 Status = newStatus,
                 PaymentStatus = newStatus == OrderStatus.Completed ? PaymentStatus.Paid : SelectedOrder.PaymentStatus
             });
 
-            if (ok)
+            if (result.IsSuccess)
             {
                 StatusMessage = $"Đã cập nhật trạng thái đơn hàng sang: {newStatus}";
                 MessageBox.Show($"Cập nhật trạng thái thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -157,8 +267,8 @@ public class OrdersViewModel : ViewModelBase
             }
             else
             {
-                StatusMessage = "Cập nhật trạng thái thất bại.";
-                MessageBox.Show("Không thể cập nhật trạng thái đơn hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = result.Error ?? "Cập nhật trạng thái thất bại.";
+                MessageBox.Show(result.Error ?? "Không thể cập nhật trạng thái đơn hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)
@@ -188,8 +298,8 @@ public class OrdersViewModel : ViewModelBase
         StatusMessage = $"Đang hủy đơn hàng {SelectedOrder.OrderNumber}...";
         try
         {
-            var ok = await _apiClient.CancelOrderAsync(SelectedOrder.Id, "Khách hàng yêu cầu hủy đơn");
-            if (ok)
+            var result = await _apiClient.CancelOrderAsync(SelectedOrder.Id, "Khách hàng yêu cầu hủy đơn");
+            if (result.IsSuccess)
             {
                 StatusMessage = $"Đã hủy đơn hàng {SelectedOrder.OrderNumber} và hoàn tồn kho thành công.";
                 MessageBox.Show("Đã hủy đơn hàng và hoàn trả số lượng vào kho.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -197,8 +307,8 @@ public class OrdersViewModel : ViewModelBase
             }
             else
             {
-                StatusMessage = "Hủy đơn hàng thất bại.";
-                MessageBox.Show("Không thể hủy đơn hàng này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = result.Error ?? "Hủy đơn hàng thất bại.";
+                MessageBox.Show(result.Error ?? "Không thể hủy đơn hàng này.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)

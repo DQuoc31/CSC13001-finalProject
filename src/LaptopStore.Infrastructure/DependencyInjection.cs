@@ -3,6 +3,7 @@ using LaptopStore.Application.Services;
 using LaptopStore.Infrastructure.Persistence;
 using LaptopStore.Infrastructure.Security;
 using LaptopStore.Infrastructure.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +30,7 @@ public static class DependencyInjection
             }
             else
             {
-                options.UseSqlite(connectionString);
+                options.UseSqlite(ResolveSqlitePath(connectionString));
             }
         });
 
@@ -49,5 +50,40 @@ public static class DependencyInjection
         services.AddScoped<IAiAssistantService, AiAssistantService>();
 
         return services;
+    }
+
+    /// <summary>
+    /// Đường dẫn SQLite tương đối (vd "laptopstore.db") vốn phụ thuộc thư mục đang chạy, khiến Client (Direct DB) và
+    /// API Server mỗi bên tạo một file riêng. Quy về thư mục "data" cạnh LaptopStore.sln để 2 chế độ dùng chung dữ liệu.
+    /// </summary>
+    private static string ResolveSqlitePath(string connectionString)
+    {
+        var builder = new SqliteConnectionStringBuilder(connectionString);
+        if (string.IsNullOrWhiteSpace(builder.DataSource)
+            || Path.IsPathRooted(builder.DataSource)
+            || builder.DataSource.Equals(":memory:", StringComparison.OrdinalIgnoreCase))
+        {
+            return connectionString;
+        }
+
+        var baseDir = FindSolutionDirectory() is { } solutionDir
+            ? Path.Combine(solutionDir, "data")
+            : AppContext.BaseDirectory;
+        Directory.CreateDirectory(baseDir);
+
+        builder.DataSource = Path.Combine(baseDir, builder.DataSource);
+        return builder.ToString();
+    }
+
+    private static string? FindSolutionDirectory()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "LaptopStore.sln")))
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+        return null;
     }
 }

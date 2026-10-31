@@ -15,6 +15,9 @@ public class ProductsViewModel : ViewModelBase
     private string _searchKeyword = string.Empty;
     private CategoryDto? _selectedCategory;
     private ProductDto? _selectedProduct;
+    private bool _showLowStockOnly;
+    private decimal _inventoryValue;
+    private int _lowStockTotal;
 
     public string SearchKeyword
     {
@@ -53,6 +56,25 @@ public class ProductsViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Chỉ hiện sản phẩm có tồn kho chạm ngưỡng cảnh báo.</summary>
+    public bool ShowLowStockOnly
+    {
+        get => _showLowStockOnly;
+        set
+        {
+            if (SetProperty(ref _showLowStockOnly, value))
+            {
+                _ = LoadProductsAsync();
+            }
+        }
+    }
+
+    /// <summary>Tổng giá trị tồn kho (giá vốn × số lượng) của danh sách đang xem.</summary>
+    public decimal InventoryValue { get => _inventoryValue; private set => SetProperty(ref _inventoryValue, value); }
+
+    /// <summary>Số sản phẩm sắp hết hàng trong danh sách đang xem (trước khi lọc).</summary>
+    public int LowStockTotal { get => _lowStockTotal; private set => SetProperty(ref _lowStockTotal, value); }
+
     public ObservableCollection<ProductDto> Products { get; } = new();
     public ObservableCollection<CategoryDto> Categories { get; } = new();
 
@@ -78,8 +100,13 @@ public class ProductsViewModel : ViewModelBase
         {
             var cats = await _apiClient.GetCategoriesAsync();
             Categories.Clear();
-            Categories.Add(new CategoryDto { Id = 0, Name = "Tất cả danh mục" });
+            var all = new CategoryDto { Id = 0, Name = "Tất cả", ProductCount = cats.Sum(c => c.ProductCount) };
+            Categories.Add(all);
             foreach (var c in cats) Categories.Add(c);
+
+            // Chọn sẵn chip "Tất cả" (gán trực tiếp để không tải lại danh sách hai lần)
+            _selectedCategory = all;
+            OnPropertyChanged(nameof(SelectedCategory));
 
             await LoadProductsAsync();
             StatusMessage = $"Đã tải {Products.Count} sản phẩm.";
@@ -100,6 +127,11 @@ public class ProductsViewModel : ViewModelBase
         {
             int? catId = (SelectedCategory != null && SelectedCategory.Id > 0) ? SelectedCategory.Id : null;
             var list = await _apiClient.GetProductsAsync(SearchKeyword, catId);
+
+            LowStockTotal = list.Count(p => p.StockQuantity <= p.MinStockLevel);
+            InventoryValue = list.Sum(p => p.CostPrice * p.StockQuantity);
+            if (ShowLowStockOnly)
+                list = list.Where(p => p.StockQuantity <= p.MinStockLevel).OrderBy(p => p.StockQuantity).ToList();
 
             Products.Clear();
             foreach (var p in list)
@@ -123,8 +155,8 @@ public class ProductsViewModel : ViewModelBase
             StatusMessage = "Đang lưu sản phẩm mới...";
             try
             {
-                var ok = await _apiClient.CreateProductAsync(dialog.ResultCreateDto);
-                if (ok)
+                var result = await _apiClient.CreateProductAsync(dialog.ResultCreateDto);
+                if (result.IsSuccess)
                 {
                     StatusMessage = $"Đã thêm thành công sản phẩm: {dialog.ResultCreateDto.Name}";
                     MessageBox.Show("Thêm mới sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -132,8 +164,8 @@ public class ProductsViewModel : ViewModelBase
                 }
                 else
                 {
-                    StatusMessage = "Không thể thêm sản phẩm. Kiểm tra lại dữ liệu hoặc SKU trùng lặp.";
-                    MessageBox.Show("Thêm sản phẩm thất bại. Có thể mã SKU đã tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusMessage = result.Error ?? "Không thể thêm sản phẩm. Kiểm tra lại dữ liệu hoặc SKU trùng lặp.";
+                    MessageBox.Show(result.Error ?? "Thêm sản phẩm thất bại. Có thể mã SKU đã tồn tại.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -160,8 +192,8 @@ public class ProductsViewModel : ViewModelBase
             StatusMessage = $"Đang cập nhật sản phẩm {SelectedProduct.Name}...";
             try
             {
-                var ok = await _apiClient.UpdateProductAsync(dialog.ResultUpdateDto);
-                if (ok)
+                var result = await _apiClient.UpdateProductAsync(dialog.ResultUpdateDto);
+                if (result.IsSuccess)
                 {
                     StatusMessage = $"Đã cập nhật sản phẩm: {dialog.ResultUpdateDto.Name}";
                     MessageBox.Show("Cập nhật thông tin sản phẩm thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -169,8 +201,8 @@ public class ProductsViewModel : ViewModelBase
                 }
                 else
                 {
-                    StatusMessage = "Cập nhật sản phẩm thất bại.";
-                    MessageBox.Show("Không thể cập nhật sản phẩm.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusMessage = result.Error ?? "Cập nhật sản phẩm thất bại.";
+                    MessageBox.Show(result.Error ?? "Không thể cập nhật sản phẩm.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -199,8 +231,8 @@ public class ProductsViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            var ok = await _apiClient.DeleteProductAsync(SelectedProduct.Id);
-            if (ok)
+            var result = await _apiClient.DeleteProductAsync(SelectedProduct.Id);
+            if (result.IsSuccess)
             {
                 Products.Remove(SelectedProduct);
                 SelectedProduct = null;
@@ -209,8 +241,8 @@ public class ProductsViewModel : ViewModelBase
             }
             else
             {
-                StatusMessage = "Không thể xóa sản phẩm.";
-                MessageBox.Show("Không thể xóa sản phẩm.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = result.Error ?? "Không thể xóa sản phẩm.";
+                MessageBox.Show(result.Error ?? "Không thể xóa sản phẩm.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)

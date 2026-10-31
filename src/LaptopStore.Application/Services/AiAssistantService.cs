@@ -111,7 +111,11 @@ public class AiAssistantService : IAiAssistantService
                 query = query.Where(p => p.WeightKg == null || p.WeightKg <= 1.8m);
             }
 
-            var recommendations = await query.OrderByDescending(p => p.Price).Take(3).ToListAsync();
+            // SQLite không ORDER BY được cột decimal → lọc trên CSDL, sắp xếp theo giá ở phía ứng dụng
+            var recommendations = (await query.ToListAsync())
+                .OrderByDescending(p => p.Price)
+                .Take(3)
+                .ToList();
 
             response.ExecutedTools.Add(new AiToolCallResultDto
             {

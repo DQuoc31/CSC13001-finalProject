@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Thông Tin Khách Hàng" Height="420" Width="500"
-        WindowStartupLocation="CenterOwner" Background="#F8FAFC" ResizeMode="NoResize">
+        Title="Thông Tin Khách Hàng" Height="520" Width="500"
+        WindowStartupLocation="CenterOwner" Background="White" ResizeMode="NoResize"
+        FontFamily="{StaticResource Font.Text}" FontSize="13" Foreground="{StaticResource Brush.Text}"
+        TextOptions.TextFormattingMode="Display">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,13 +17,13 @@
 
         <!-- Header -->
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="0,0,0,10" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
-            <TextBlock x:Name="TxtTitle" Text="➕ Thêm Khách Hàng Mới" FontSize="17" FontWeight="Bold" Foreground="#1E293B"/>
+            <TextBlock x:Name="TxtTitle" Text="Thêm Khách Hàng Mới" FontSize="17" FontWeight="Bold" Foreground="#1E293B"/>
         </Border>
 
         <!-- Form Inputs -->
         <StackPanel Grid.Row="1">
-            <TextBlock Text="Họ và tên khách hàng (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-            <TextBox x:Name="TxtFullName" Padding="8,6" Margin="0,0,0,12" FontSize="13"/>
+            <TextBlock Text="Họ và tên khách hàng (*):" Style="{StaticResource Text.Label}"/>
+            <TextBox x:Name="TxtFullName" Margin="0,0,0,12"/>
 
             <Grid Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
@@ -31,30 +33,28 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="Số điện thoại (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtPhone" Padding="8,6" FontSize="13"/>
+                    <TextBlock Text="Số điện thoại (*):" Style="{StaticResource Text.Label}"/>
+                    <TextBox x:Name="TxtPhone"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
-                    <TextBlock Text="Địa chỉ Email:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtEmail" Padding="8,6" FontSize="13"/>
+                    <TextBlock Text="Địa chỉ Email:" Style="{StaticResource Text.Label}"/>
+                    <TextBox x:Name="TxtEmail"/>
                 </StackPanel>
             </Grid>
 
-            <TextBlock Text="Địa chỉ giao hàng / cư trú:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-            <TextBox x:Name="TxtAddress" Padding="8,6" Margin="0,0,0,12" FontSize="13"/>
+            <TextBlock Text="Địa chỉ giao hàng / cư trú:" Style="{StaticResource Text.Label}"/>
+            <TextBox x:Name="TxtAddress" Margin="0,0,0,12"/>
 
-            <TextBlock Text="Ghi chú thêm:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-            <TextBox x:Name="TxtNote" Height="50" TextWrapping="Wrap" AcceptsReturn="True" Padding="8,6" FontSize="13"/>
+            <TextBlock Text="Ghi chú thêm:" Style="{StaticResource Text.Label}"/>
+            <TextBox x:Name="TxtNote" Height="50" TextWrapping="Wrap" AcceptsReturn="True"/>
         </StackPanel>
 
         <!-- Buttons -->
         <Border Grid.Row="2" Margin="0,16,0,0" Padding="0,10,0,0" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Hủy bỏ" Padding="16,6" Margin="0,0,8,0" Background="#E2E8F0" Foreground="#334155"
-                        BorderThickness="0" FontWeight="SemiBold" Click="CancelButton_Click"/>
-                <Button Content="💾 Lưu Khách Hàng" Padding="20,6" Background="#2563EB" Foreground="White"
-                        BorderThickness="0" FontWeight="Bold" Click="SaveButton_Click"/>
+                <Button Content="Hủy bỏ" Margin="0,0,8,0" MinWidth="96" Click="CancelButton_Click"/>
+                <Button Style="{StaticResource Btn.Primary}" Content="Lưu Khách Hàng" MinWidth="140" Click="SaveButton_Click"/>
             </StackPanel>
         </Border>
     </Grid>

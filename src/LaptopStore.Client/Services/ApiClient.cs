@@ -5,6 +5,8 @@ using LaptopStore.Application.DTOs.Customers;
 using LaptopStore.Application.DTOs.Orders;
 using LaptopStore.Application.DTOs.Products;
 using LaptopStore.Application.DTOs.Reports;
+using LaptopStore.Domain.Common;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -15,42 +17,48 @@ public interface IApiClient
 {
     string? Token { get; set; }
     bool IsAuthenticated => !string.IsNullOrEmpty(Token);
+
+    /// <summary>Người dùng đang đăng nhập (null nếu chưa đăng nhập).</summary>
+    LoginResponseDto? CurrentUser { get; }
+
+    /// <summary>Phát ra khi API Server trả 401 (token hết hạn/không hợp lệ) để giao diện đưa người dùng về màn hình đăng nhập.</summary>
+    event EventHandler? SessionExpired;
     string ConnectionMode { get; }
     bool IsDirectDatabaseMode { get; }
     void SetConnectionMode(bool useApiServer);
 
     // Auth
-    Task<LoginResponseDto?> LoginAsync(string username, string password);
+    Task<Result<LoginResponseDto>> LoginAsync(string username, string password);
     void Logout();
 
     // Products
     Task<List<ProductDto>> GetProductsAsync(string? keyword = null, int? categoryId = null);
     Task<ProductDto?> GetProductByIdAsync(int id);
-    Task<bool> CreateProductAsync(CreateProductDto dto);
-    Task<bool> UpdateProductAsync(UpdateProductDto dto);
-    Task<bool> DeleteProductAsync(int id);
+    Task<Result> CreateProductAsync(CreateProductDto dto);
+    Task<Result> UpdateProductAsync(UpdateProductDto dto);
+    Task<Result> DeleteProductAsync(int id);
 
     // Categories
     Task<List<CategoryDto>> GetCategoriesAsync();
     Task<CategoryDto?> GetCategoryByIdAsync(int id);
-    Task<bool> CreateCategoryAsync(CreateCategoryDto dto);
-    Task<bool> UpdateCategoryAsync(UpdateCategoryDto dto);
-    Task<bool> DeleteCategoryAsync(int id);
+    Task<Result> CreateCategoryAsync(CreateCategoryDto dto);
+    Task<Result> UpdateCategoryAsync(UpdateCategoryDto dto);
+    Task<Result> DeleteCategoryAsync(int id);
 
     // Customers
     Task<List<CustomerDto>> GetCustomersAsync(string? keyword = null);
     Task<CustomerDto?> GetCustomerByIdAsync(int id);
-    Task<bool> CreateCustomerAsync(CreateCustomerDto dto);
-    Task<bool> UpdateCustomerAsync(UpdateCustomerDto dto);
-    Task<bool> DeleteCustomerAsync(int id);
+    Task<Result> CreateCustomerAsync(CreateCustomerDto dto);
+    Task<Result> UpdateCustomerAsync(UpdateCustomerDto dto);
+    Task<Result> DeleteCustomerAsync(int id);
     Task<List<OrderDto>> GetCustomerOrdersAsync(int customerId);
 
     // Orders
     Task<List<OrderDto>> GetOrdersAsync();
     Task<OrderDto?> GetOrderByIdAsync(int id);
-    Task<OrderDto?> CreateOrderAsync(CreateOrderDto dto);
-    Task<bool> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto);
-    Task<bool> CancelOrderAsync(int orderId, string reason);
+    Task<Result<OrderDto>> CreateOrderAsync(CreateOrderDto dto);
+    Task<Result> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto);
+    Task<Result> CancelOrderAsync(int orderId, string reason);
 
     // Reports
     Task<DashboardSummaryDto?> GetDashboardSummaryAsync();
@@ -65,6 +73,9 @@ public class ApiClient : IApiClient
 {
     private readonly HttpClient _http;
     private string? _token;
+
+    public LoginResponseDto? CurrentUser { get; private set; }
+    public event EventHandler? SessionExpired;
 
     public string ConnectionMode => "API Server Mode (Ứng dụng ➔ API Server ➔ Database Server - Cuối kỳ)";
     public bool IsDirectDatabaseMode => false;
@@ -93,25 +104,49 @@ public class ApiClient : IApiClient
 
     public ApiClient(string baseAddress = "http://localhost:5000/")
     {
-        _http = new HttpClient { BaseAddress = new Uri(baseAddress) };
+        _http = new HttpClient(new UnauthorizedHandler(OnUnauthorized)) { BaseAddress = new Uri(baseAddress) };
     }
 
     public void Logout()
     {
         Token = null;
+        CurrentUser = null;
     }
 
-    public async Task<LoginResponseDto?> LoginAsync(string username, string password)
+    private void OnUnauthorized()
     {
-        var resp = await _http.PostAsJsonAsync("api/auth/login", new LoginRequestDto { Username = username, Password = password });
-        if (!resp.IsSuccessStatusCode) return null;
+        // Chỉ coi là hết phiên khi đang đăng nhập; sai mật khẩu lúc đăng nhập cũng trả 401 nhưng không phải hết phiên
+        if (CurrentUser == null) return;
 
-        var result = await resp.Content.ReadFromJsonAsync<LoginResponseDto>();
-        if (result != null)
+        Logout();
+        SessionExpired?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task<Result<LoginResponseDto>> LoginAsync(string username, string password)
+    {
+        Logout();
+        try
         {
+            var resp = await _http.PostAsJsonAsync("api/auth/login", new LoginRequestDto { Username = username, Password = password });
+            if (!resp.IsSuccessStatusCode)
+            {
+                // API trả 401 kèm { message } khi sai tài khoản, nên đọc message trước khi dùng thông báo mặc định cho 401
+                var message = await ReadMessageAsync(resp);
+                return Result<LoginResponseDto>.Failure(message ?? await ReadErrorAsync(resp));
+            }
+
+            var result = await resp.Content.ReadFromJsonAsync<LoginResponseDto>();
+            if (result == null)
+                return Result<LoginResponseDto>.Failure("API Server trả về dữ liệu đăng nhập không hợp lệ.");
+
             Token = result.Token;
+            CurrentUser = result;
+            return Result<LoginResponseDto>.Success(result);
         }
-        return result;
+        catch (HttpRequestException)
+        {
+            return Result<LoginResponseDto>.Failure(ConnectionError);
+        }
     }
 
     public async Task<List<ProductDto>> GetProductsAsync(string? keyword = null, int? categoryId = null)
@@ -129,22 +164,19 @@ public class ApiClient : IApiClient
         return await _http.GetFromJsonAsync<ProductDto>($"api/products/{id}");
     }
 
-    public async Task<bool> CreateProductAsync(CreateProductDto dto)
+    public async Task<Result> CreateProductAsync(CreateProductDto dto)
     {
-        var resp = await _http.PostAsJsonAsync("api/products", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PostAsJsonAsync("api/products", dto));
     }
 
-    public async Task<bool> UpdateProductAsync(UpdateProductDto dto)
+    public async Task<Result> UpdateProductAsync(UpdateProductDto dto)
     {
-        var resp = await _http.PutAsJsonAsync($"api/products/{dto.Id}", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PutAsJsonAsync($"api/products/{dto.Id}", dto));
     }
 
-    public async Task<bool> DeleteProductAsync(int id)
+    public async Task<Result> DeleteProductAsync(int id)
     {
-        var resp = await _http.DeleteAsync($"api/products/{id}");
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.DeleteAsync($"api/products/{id}"));
     }
 
     public async Task<List<CategoryDto>> GetCategoriesAsync()
@@ -158,22 +190,19 @@ public class ApiClient : IApiClient
         return await _http.GetFromJsonAsync<CategoryDto>($"api/categories/{id}");
     }
 
-    public async Task<bool> CreateCategoryAsync(CreateCategoryDto dto)
+    public async Task<Result> CreateCategoryAsync(CreateCategoryDto dto)
     {
-        var resp = await _http.PostAsJsonAsync("api/categories", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PostAsJsonAsync("api/categories", dto));
     }
 
-    public async Task<bool> UpdateCategoryAsync(UpdateCategoryDto dto)
+    public async Task<Result> UpdateCategoryAsync(UpdateCategoryDto dto)
     {
-        var resp = await _http.PutAsJsonAsync($"api/categories/{dto.Id}", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PutAsJsonAsync($"api/categories/{dto.Id}", dto));
     }
 
-    public async Task<bool> DeleteCategoryAsync(int id)
+    public async Task<Result> DeleteCategoryAsync(int id)
     {
-        var resp = await _http.DeleteAsync($"api/categories/{id}");
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.DeleteAsync($"api/categories/{id}"));
     }
 
     public async Task<List<CustomerDto>> GetCustomersAsync(string? keyword = null)
@@ -188,22 +217,19 @@ public class ApiClient : IApiClient
         return await _http.GetFromJsonAsync<CustomerDto>($"api/customers/{id}");
     }
 
-    public async Task<bool> CreateCustomerAsync(CreateCustomerDto dto)
+    public async Task<Result> CreateCustomerAsync(CreateCustomerDto dto)
     {
-        var resp = await _http.PostAsJsonAsync("api/customers", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PostAsJsonAsync("api/customers", dto));
     }
 
-    public async Task<bool> UpdateCustomerAsync(UpdateCustomerDto dto)
+    public async Task<Result> UpdateCustomerAsync(UpdateCustomerDto dto)
     {
-        var resp = await _http.PutAsJsonAsync($"api/customers/{dto.Id}", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PutAsJsonAsync($"api/customers/{dto.Id}", dto));
     }
 
-    public async Task<bool> DeleteCustomerAsync(int id)
+    public async Task<Result> DeleteCustomerAsync(int id)
     {
-        var resp = await _http.DeleteAsync($"api/customers/{id}");
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.DeleteAsync($"api/customers/{id}"));
     }
 
     public async Task<List<OrderDto>> GetCustomerOrdersAsync(int customerId)
@@ -223,23 +249,33 @@ public class ApiClient : IApiClient
         return await _http.GetFromJsonAsync<OrderDto>($"api/orders/{id}");
     }
 
-    public async Task<OrderDto?> CreateOrderAsync(CreateOrderDto dto)
+    public async Task<Result<OrderDto>> CreateOrderAsync(CreateOrderDto dto)
     {
-        var resp = await _http.PostAsJsonAsync("api/orders", dto);
-        if (!resp.IsSuccessStatusCode) return null;
-        return await resp.Content.ReadFromJsonAsync<OrderDto>();
+        try
+        {
+            var resp = await _http.PostAsJsonAsync("api/orders", dto);
+            if (!resp.IsSuccessStatusCode)
+                return Result<OrderDto>.Failure(await ReadErrorAsync(resp));
+
+            var order = await resp.Content.ReadFromJsonAsync<OrderDto>();
+            return order != null
+                ? Result<OrderDto>.Success(order)
+                : Result<OrderDto>.Failure("API Server trả về dữ liệu đơn hàng không hợp lệ.");
+        }
+        catch (HttpRequestException)
+        {
+            return Result<OrderDto>.Failure(ConnectionError);
+        }
     }
 
-    public async Task<bool> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto)
+    public async Task<Result> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto)
     {
-        var resp = await _http.PutAsJsonAsync($"api/orders/{orderId}/status", dto);
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PutAsJsonAsync($"api/orders/{orderId}/status", dto));
     }
 
-    public async Task<bool> CancelOrderAsync(int orderId, string reason)
+    public async Task<Result> CancelOrderAsync(int orderId, string reason)
     {
-        var resp = await _http.PostAsJsonAsync($"api/orders/{orderId}/cancel", new { Reason = reason });
-        return resp.IsSuccessStatusCode;
+        return await SendAsync(() => _http.PostAsJsonAsync($"api/orders/{orderId}/cancel", new { Reason = reason }));
     }
 
     public async Task<DashboardSummaryDto?> GetDashboardSummaryAsync()
@@ -264,5 +300,76 @@ public class ApiClient : IApiClient
         var resp = await _http.PostAsJsonAsync("api/ai/ask", new AiQueryRequestDto { Prompt = prompt });
         if (!resp.IsSuccessStatusCode) return null;
         return await resp.Content.ReadFromJsonAsync<AiQueryResponseDto>();
+    }
+
+    private string ConnectionError => $"Không kết nối được API Server ({_http.BaseAddress}). Hãy chạy LaptopStore.Api hoặc chuyển sang chế độ Direct Database.";
+
+    /// <summary>
+    /// Gửi request ghi dữ liệu và chuyển kết quả HTTP thành Result kèm thông báo lỗi từ API.
+    /// </summary>
+    private async Task<Result> SendAsync(Func<Task<HttpResponseMessage>> send)
+    {
+        try
+        {
+            var resp = await send();
+            return resp.IsSuccessStatusCode ? Result.Success() : Result.Failure(await ReadErrorAsync(resp));
+        }
+        catch (HttpRequestException)
+        {
+            return Result.Failure(ConnectionError);
+        }
+    }
+
+    private static async Task<string> ReadErrorAsync(HttpResponseMessage resp)
+    {
+        switch (resp.StatusCode)
+        {
+            case HttpStatusCode.Unauthorized:
+                return "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.";
+            case HttpStatusCode.Forbidden:
+                return "Tài khoản của bạn không có quyền thực hiện thao tác này.";
+        }
+
+        return await ReadMessageAsync(resp) ?? $"Thao tác thất bại (HTTP {(int)resp.StatusCode}).";
+    }
+
+    private static async Task<string?> ReadMessageAsync(HttpResponseMessage resp)
+    {
+        try
+        {
+            var body = await resp.Content.ReadFromJsonAsync<ApiErrorResponse>();
+            return string.IsNullOrWhiteSpace(body?.Message) ? null : body.Message;
+        }
+        catch (Exception)
+        {
+            // Body rỗng hoặc không phải JSON dạng { message } (ví dụ lỗi validation mặc định của ASP.NET Core)
+            return null;
+        }
+    }
+
+    private sealed class ApiErrorResponse
+    {
+        public string? Message { get; set; }
+    }
+
+    /// <summary>
+    /// Bắt mọi response 401 (kể cả các lệnh GET dùng GetFromJsonAsync) để báo hết phiên đăng nhập.
+    /// </summary>
+    private sealed class UnauthorizedHandler : DelegatingHandler
+    {
+        private readonly Action _onUnauthorized;
+
+        public UnauthorizedHandler(Action onUnauthorized) : base(new HttpClientHandler())
+        {
+            _onUnauthorized = onUnauthorized;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = await base.SendAsync(request, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                _onUnauthorized();
+            return response;
+        }
     }
 }

@@ -16,6 +16,7 @@ public partial class ProductEditWindow : Window
     public ProductEditWindow(List<CategoryDto> categories, ProductDto? existingProduct = null)
     {
         InitializeComponent();
+        SourceInitialized += (_, _) => WindowCaption.Apply(this);
         _existingProduct = existingProduct;
 
         // Điền danh sách danh mục (bỏ danh mục id=0 "Tất cả")
@@ -27,7 +28,7 @@ public partial class ProductEditWindow : Window
 
         if (existingProduct != null)
         {
-            TxtTitle.Text = $"✏️ Chỉnh Sửa Sản Phẩm: {existingProduct.Name}";
+            TxtTitle.Text = $"Chỉnh Sửa Sản Phẩm: {existingProduct.Name}";
             Title = $"Chỉnh sửa - {existingProduct.Sku}";
 
             TxtName.Text = existingProduct.Name;

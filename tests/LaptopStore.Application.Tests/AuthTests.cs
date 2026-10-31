@@ -57,6 +57,7 @@ public class AuthTests
         Assert.NotNull(result.Value.Token);
         Assert.Equal("admin", result.Value.Username);
         Assert.Equal(UserRole.Admin, result.Value.Role);
+        Assert.Equal(user.Id, result.Value.UserId); // client dùng UserId này để ghi người lập đơn
     }
 
     [Fact]
