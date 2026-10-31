@@ -224,11 +224,16 @@ Mở 2 cửa sổ terminal:
 
 ## 9. Kiểm thử chất lượng phần mềm
 
-Chạy toàn bộ 12 test case tự động:
+Chạy toàn bộ 36 test case tự động:
 ```powershell
 dotnet test
 ```
-**Kết quả:** `Passed! - Failed: 0, Passed: 12, Skipped: 0, Total: 12 (100% Pass)`.
+**Kết quả:** `Passed! - Failed: 0, Passed: 36, Skipped: 0, Total: 36 (100% Pass)`.
+
+> Project test nhắm `net8.0`, nên máy cần cài **.NET 8 Runtime**. Nếu máy chỉ có .NET 10, chạy tạm bằng: `$env:DOTNET_ROLL_FORWARD="Major"; dotnet test`
+
+### Tích hợp liên tục (CI)
+Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) tự động chạy `restore` ➔ `build` (Release) ➔ `test` trên `windows-latest` mỗi khi push lên `main`/`master` hoặc mở Pull Request.
 
 ---
 

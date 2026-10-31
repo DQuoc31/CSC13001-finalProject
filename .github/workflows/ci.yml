@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    # LaptopStore.Client targets net8.0-windows, so a Windows runner is required
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore LaptopStore.sln
+
+      - name: Build
+        run: dotnet build LaptopStore.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test LaptopStore.sln --configuration Release --no-build --verbosity normal
