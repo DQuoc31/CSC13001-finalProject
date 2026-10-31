@@ -35,6 +35,9 @@ public partial class App : WpfApplication
         var defaultUseApi = (configuration["ConnectionMode"] ?? "DirectDatabase")
             .Equals("ApiServer", StringComparison.OrdinalIgnoreCase);
 
+        // JwtTokenGenerator (dùng khi đăng nhập ở chế độ Direct DB) cần IConfiguration để đọc mục Jwt
+        services.AddSingleton<IConfiguration>(configuration);
+
         // 1. Tầng dữ liệu Infrastructure (DbContext, Services, Security) cho chế độ Giữa kỳ (Direct DB)
         services.AddInfrastructureServices(configuration);
 
