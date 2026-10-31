@@ -45,6 +45,7 @@ public class AuthService : IAuthService
 
         return Result<LoginResponseDto>.Success(new LoginResponseDto
         {
+            UserId = user.Id,
             Token = token,
             Username = user.Username,
             FullName = user.FullName,
