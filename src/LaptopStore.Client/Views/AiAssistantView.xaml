@@ -3,98 +3,177 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+             xmlns:ctl="clr-namespace:LaptopStore.Client.Controls"
+             mc:Ignorable="d" d:DesignHeight="760" d:DesignWidth="1150">
+    <UserControl.Resources>
+        <Style x:Key="Suggestion" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="White" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1" CornerRadius="12" Padding="12,11">
+                            <DockPanel>
+                                <ctl:Icon Data="{TemplateBinding ctl:Ui.Icon}" Width="16" Height="16" Foreground="{StaticResource Brush.Accent}" Margin="0,1,10,0" VerticalAlignment="Top"/>
+                                <ContentPresenter/>
+                            </DockPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#BFDBFE"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#F7FAFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
-        <!-- Tiêu đề -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="🤖 Trợ Lý AI Nghiệp Vụ Thông Minh" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
-            <TextBlock Text="Hỗ trợ RBAC &amp; Tích hợp dữ liệu thời gian thực" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#64748B"/>
-        </DockPanel>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Thanh nút câu hỏi gợi ý nhanh -->
-        <Border Grid.Row="1" Background="#F8FAFC" CornerRadius="8" Padding="10" Margin="0,0,0,14" BorderBrush="#E2E8F0" BorderThickness="1">
-            <WrapPanel>
-                <TextBlock Text="💡 Câu hỏi mẫu nhanh:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,8,0"/>
-                <Button Content="📊 Báo cáo doanh thu tháng" Margin="4,2" Padding="8,4" Background="#E0E7FF" Foreground="#3730A3" BorderThickness="0"
-                        Command="{Binding QuickPromptCommand}" CommandParameter="Doanh thu tháng này của cửa hàng là bao nhiêu?"/>
-                <Button Content="⚠️ Sản phẩm sắp hết hàng" Margin="4,2" Padding="8,4" Background="#FEF3C7" Foreground="#92400E" BorderThickness="0"
-                        Command="{Binding QuickPromptCommand}" CommandParameter="Sản phẩm nào trong kho đang sắp hết hàng?"/>
-                <Button Content="💻 Tư vấn laptop 25 triệu" Margin="4,2" Padding="8,4" Background="#DCFCE7" Foreground="#166534" BorderThickness="0"
-                        Command="{Binding QuickPromptCommand}" CommandParameter="Tư vấn cho tôi laptop khoảng 25 triệu để lập trình và học tập."/>
-                <Button Content="🎮 Laptop gaming 35 triệu" Margin="4,2" Padding="8,4" Background="#FCE7F3" Foreground="#9D174D" BorderThickness="0"
-                        Command="{Binding QuickPromptCommand}" CommandParameter="Gợi ý laptop gaming tầm 35 triệu card rời khỏe."/>
-            </WrapPanel>
+        <!-- Khung chat -->
+        <Border Style="{StaticResource Card}" ClipToBounds="True">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="34" Height="34" CornerRadius="10" Background="{StaticResource Brush.AccentGradient}">
+                            <ctl:Icon Data="{StaticResource Icon.Spark}" Width="17" Height="17" Foreground="White"/>
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Trợ lý AI nghiệp vụ" Style="{StaticResource Text.CardTitle}"/>
+                            <TextBlock Text="Truy vấn dữ liệu thật của cửa hàng · tuân thủ phân quyền tài khoản" Style="{StaticResource Text.Muted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Ô nhập -->
+                <Border DockPanel.Dock="Bottom" Margin="20,8,20,18" Background="White" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+                        CornerRadius="14" Padding="6,6,6,6">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Direction="270" Opacity="0.06"/>
+                    </Border.Effect>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource Btn.Primary}" Width="40" Height="40" Padding="0"
+                                ctl:Ui.Icon="{StaticResource Icon.Send}" Command="{Binding SendMessageCommand}" ToolTip="Gửi (Enter)"/>
+                        <TextBox Text="{Binding UserPrompt, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"
+                                 ctl:Ui.Placeholder="Hỏi về doanh thu, tồn kho, tư vấn sản phẩm…" FontSize="13.5">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </DockPanel>
+                </Border>
+
+                <!-- Tin nhắn -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" ctl:Ui.AutoScroll="True" Padding="24,18">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding Messages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid x:Name="Row" Margin="0,0,0,18" HorizontalAlignment="Right" MaxWidth="640">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border x:Name="Avatar" Width="32" Height="32" CornerRadius="10" Background="{StaticResource Brush.AccentGradient}"
+                                                VerticalAlignment="Top" Margin="0,0,12,0" Visibility="Collapsed">
+                                            <ctl:Icon Data="{StaticResource Icon.Spark}" Width="15" Height="15" Foreground="White"/>
+                                        </Border>
+                                        <Border x:Name="Bubble" Grid.Column="1" CornerRadius="14,4,14,14" Padding="14,11"
+                                                Background="{StaticResource Brush.Accent}" BorderBrush="{StaticResource Brush.Accent}" BorderThickness="1">
+                                            <StackPanel>
+                                                <Border x:Name="Tool" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
+                                                        Background="{StaticResource Brush.VioletSoft}" Visibility="{Binding ToolInfo, Converter={StaticResource Vis}}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <ctl:Icon Data="{StaticResource Icon.Db}" Width="12" Height="12" Foreground="{StaticResource Brush.Violet}" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding ToolInfo}" FontSize="12" FontWeight="Medium"
+                                                                   Foreground="{StaticResource Brush.Violet}" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </Border>
+                                                <TextBlock x:Name="Msg" Text="{Binding Message}" TextWrapping="Wrap" LineHeight="21" Foreground="White"/>
+                                                <TextBlock x:Name="Time" Text="{Binding Time, StringFormat={}{0:HH:mm}}" FontSize="10.5" Margin="0,6,0,0"
+                                                           Foreground="#BFDBFE" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsAi}" Value="True">
+                                            <Setter TargetName="Row" Property="HorizontalAlignment" Value="Left"/>
+                                            <Setter TargetName="Avatar" Property="Visibility" Value="Visible"/>
+                                            <Setter TargetName="Bubble" Property="Background" Value="{StaticResource Brush.Surface2}"/>
+                                            <Setter TargetName="Bubble" Property="BorderBrush" Value="{StaticResource Brush.Line}"/>
+                                            <Setter TargetName="Bubble" Property="CornerRadius" Value="4,14,14,14"/>
+                                            <Setter TargetName="Msg" Property="Foreground" Value="{StaticResource Brush.Text}"/>
+                                            <Setter TargetName="Time" Property="Foreground" Value="{StaticResource Brush.Faint}"/>
+                                            <Setter TargetName="Time" Property="HorizontalAlignment" Value="Left"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Đang trả lời -->
+                        <StackPanel Orientation="Horizontal" Visibility="{Binding IsBusy, Converter={StaticResource Vis}}" Margin="44,0,0,8">
+                            <TextBlock Text="AI đang truy vấn dữ liệu…" Style="{StaticResource Text.Muted}" FontStyle="Italic"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
         </Border>
 
-        <!-- Khung hiển thị cuộc trò chuyện (Chat Stream) -->
-        <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#CBD5E1" BorderThickness="1" Padding="12" Margin="0,0,0,14">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Messages}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="0,6" Padding="12,10" CornerRadius="8" BorderThickness="1">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#F8FAFC"/>
-                                        <Setter Property="BorderBrush" Value="#E2E8F0"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsAi}" Value="true">
-                                                <Setter Property="Background" Value="#F0FDF4"/>
-                                                <Setter Property="BorderBrush" Value="#BBF7D0"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <StackPanel>
-                                    <DockPanel Margin="0,0,0,4">
-                                        <TextBlock Text="{Binding Sender}" FontWeight="Bold" FontSize="13">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#2563EB"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsAi}" Value="true">
-                                                            <Setter Property="Foreground" Value="#16A34A"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Time, StringFormat={}{0:HH:mm:ss}}" HorizontalAlignment="Right" FontSize="11" Foreground="#94A3B8"/>
-                                    </DockPanel>
+        <!-- Gợi ý -->
+        <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16">
+            <StackPanel>
+                <TextBlock Text="Gợi ý câu hỏi" Style="{StaticResource Text.CardTitle}" Margin="0,0,0,12"/>
+                <Button Style="{StaticResource Suggestion}" ctl:Ui.Icon="{StaticResource Icon.Chart}"
+                        Command="{Binding QuickPromptCommand}" CommandParameter="Doanh thu tháng này của cửa hàng là bao nhiêu?">
+                    <StackPanel>
+                        <TextBlock Text="Báo cáo doanh thu tháng" FontWeight="SemiBold" FontSize="12.5"/>
+                        <TextBlock Text="Tổng hợp doanh thu, top sản phẩm" Style="{StaticResource Text.Muted}" FontSize="11.5"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource Suggestion}" ctl:Ui.Icon="{StaticResource Icon.Alert}"
+                        Command="{Binding QuickPromptCommand}" CommandParameter="Sản phẩm nào trong kho đang sắp hết hàng?">
+                    <StackPanel>
+                        <TextBlock Text="Sản phẩm sắp hết hàng" FontWeight="SemiBold" FontSize="12.5"/>
+                        <TextBlock Text="Danh sách cần nhập bổ sung" Style="{StaticResource Text.Muted}" FontSize="11.5"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource Suggestion}" ctl:Ui.Icon="{StaticResource Icon.Laptop}"
+                        Command="{Binding QuickPromptCommand}" CommandParameter="Tư vấn cho tôi laptop khoảng 25 triệu để lập trình và học tập.">
+                    <StackPanel>
+                        <TextBlock Text="Tư vấn laptop 25 triệu" FontWeight="SemiBold" FontSize="12.5"/>
+                        <TextBlock Text="Lập trình, học tập" Style="{StaticResource Text.Muted}" FontSize="11.5"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource Suggestion}" ctl:Ui.Icon="{StaticResource Icon.Gpu}"
+                        Command="{Binding QuickPromptCommand}" CommandParameter="Gợi ý laptop gaming tầm 35 triệu card rời khỏe.">
+                    <StackPanel>
+                        <TextBlock Text="Laptop gaming 35 triệu" FontWeight="SemiBold" FontSize="12.5"/>
+                        <TextBlock Text="Card đồ hoạ rời mạnh" Style="{StaticResource Text.Muted}" FontSize="11.5"/>
+                    </StackPanel>
+                </Button>
 
-                                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13" Foreground="#1E293B" LineHeight="20"/>
-
-                                    <TextBlock Text="{Binding ToolInfo}" Margin="0,6,0,0" FontSize="11" Foreground="#64748B" FontStyle="Italic"
-                                               Visibility="{Binding ToolInfo, Converter={x:Null}}"/>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                <Border Background="{StaticResource Brush.Surface2}" BorderBrush="{StaticResource Brush.Line}" BorderThickness="1"
+                        CornerRadius="12" Padding="12" Margin="0,8,0,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <ctl:Icon Data="{StaticResource Icon.Shield}" Width="15" Height="15" Foreground="{StaticResource Brush.Ok}" Margin="0,0,7,0"/>
+                            <TextBlock Text="Phân quyền dữ liệu" FontWeight="SemiBold" FontSize="12.5"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource Text.Muted}" TextWrapping="Wrap" LineHeight="18"
+                                   Text="AI chỉ trả lời trong phạm vi quyền của tài khoản đang đăng nhập. Nhân viên bán hàng sẽ không xem được doanh thu toàn hệ thống."/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Border>
-
-        <!-- Ô nhập câu hỏi & Nút Gửi -->
-        <Grid Grid.Row="3">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="120"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBox Grid.Column="0" Text="{Binding UserPrompt, UpdateSourceTrigger=PropertyChanged}"
-                     Padding="12,8" FontSize="13" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
-
-            <Button Grid.Column="1" Content="Gửi Câu Hỏi 🚀" Background="#2563EB" Foreground="White"
-                    FontWeight="SemiBold" BorderThickness="0"
-                    Command="{Binding SendMessageCommand}"/>
-        </Grid>
     </Grid>
 </UserControl>

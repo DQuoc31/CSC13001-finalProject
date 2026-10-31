@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>TechGear — UI Redesign Mockup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#F4F6FA; --surface:#FFFFFF; --surface-2:#F8FAFC; --line:#E6EAF0; --line-2:#EEF1F5;
+  --text:#0F172A; --text-2:#334155; --muted:#64748B; --faint:#94A3B8;
+  --side:#0054A6; --side-2:rgba(255,255,255,.12); --side-line:rgba(255,255,255,.18); --side-text:#DBEAFE;
+  --accent:#2563EB; --accent-2:#3B82F6; --accent-soft:#EFF6FF; --accent-ink:#1E40AF;
+  --ok:#059669; --ok-soft:#E7F8F1; --warn:#D97706; --warn-soft:#FEF4E2; --bad:#DC2626; --bad-soft:#FDECEC;
+  --info:#0284C7; --info-soft:#E6F4FC; --violet:#7C3AED; --violet-soft:#F1EBFE;
+  --r-sm:8px; --r:12px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);
+  --sh-2:0 4px 16px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.05);
+  --sh-3:0 20px 50px rgba(15,23,42,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;font-size:13.5px;color:var(--text);background:#DCE1EA;
+  display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.sm{width:15px;height:15px}.ic.lg{width:22px;height:22px}
+
+/* ---------- Window frame ---------- */
+.window{width:1440px;height:900px;background:var(--bg);border-radius:10px;overflow:hidden;box-shadow:0 30px 80px rgba(15,23,42,.35);display:flex;flex-direction:column;position:relative}
+.titlebar{height:34px;background:#00427F;display:flex;align-items:center;padding-left:14px;color:#BFDBFE;font-size:12px;gap:8px;flex:none}
+.titlebar .logo-dot{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#FFFFFF,#BFDBFE)}
+.titlebar .ctrls{margin-left:auto;display:flex}
+.titlebar .ctrls span{width:46px;height:34px;display:grid;place-items:center;color:#BFDBFE}
+.app{flex:1;display:flex;min-height:0}
+
+/* ---------- Sidebar ---------- */
+.side{width:248px;background:#0054A6;color:var(--side-text);display:flex;flex-direction:column;padding:6px 14px 14px;flex:none;position:relative;overflow:hidden}
+.side::before{content:"";position:absolute;top:-80px;right:-90px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%);pointer-events:none}
+.side > *{position:relative}
+.brand{display:flex;align-items:center;gap:11px;padding:12px 8px 20px}
+.brand .mark{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:#0054A6;box-shadow:0 6px 18px rgba(15,23,42,.25)}
+.brand b{display:block;color:#fff;font-size:15px;letter-spacing:.2px}
+.brand small{color:#BFDBFE;font-size:11.5px}
+.nav-label{font-size:10.5px;letter-spacing:1.1px;color:rgba(219,234,254,.6);font-weight:600;padding:14px 10px 8px;text-transform:uppercase}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;color:var(--side-text);text-decoration:none;font-weight:500;margin:1px 0;cursor:pointer;position:relative}
+.nav a:hover{background:var(--side-2);color:#fff}
+.nav a.active{background:#fff;color:#0054A6;font-weight:600;box-shadow:0 4px 14px rgba(15,23,42,.18)}
+.nav a.active .ic{color:#0054A6}
+.nav .badge{margin-left:auto;font-size:11px;background:rgba(255,255,255,.16);color:#EFF6FF;padding:1px 7px;border-radius:20px}
+.nav a.active .badge{background:#E0EDFA;color:#0054A6}
+.nav .badge.hot{background:#EF4444;color:#fff}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.mode-card{background:var(--side-2);border:1px solid var(--side-line);border-radius:12px;padding:12px}
+.mode-card .t{font-size:11px;color:#BFDBFE;margin-bottom:8px;display:flex;justify-content:space-between}
+.seg{display:flex;background:rgba(15,23,42,.22);border-radius:8px;padding:3px;gap:3px}
+.seg span{flex:1;text-align:center;padding:6px 4px;border-radius:6px;font-size:11.5px;color:#DBEAFE;display:flex;gap:5px;align-items:center;justify-content:center;cursor:pointer}
+.seg span.on{background:#fff;color:#0054A6;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.mode-card .flow{font-size:11px;color:#BFDBFE;margin-top:9px;display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18);display:inline-block}
+.side .dot{background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
+.user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px}
+.user:hover{background:var(--side-2)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;font-size:12.5px;background:linear-gradient(135deg,#F472B6,#8B5CF6);flex:none}
+.user b{color:#fff;font-size:13px;display:block;font-weight:600}
+.user small{color:#BFDBFE;font-size:11.5px}
+.user .ic{margin-left:auto;color:#BFDBFE}
+
+/* ---------- Main ---------- */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:64px;display:flex;align-items:center;gap:14px;padding:0 28px;background:rgba(244,246,250,.9);border-bottom:1px solid var(--line);flex:none}
+.crumb{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.crumb b{color:var(--text);font-weight:600}
+.gsearch{margin-left:auto;width:340px;height:38px;border:1px solid var(--line);background:#fff;border-radius:10px;display:flex;align-items:center;gap:9px;padding:0 12px;color:var(--faint)}
+.kbd{margin-left:auto;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;color:var(--muted);background:var(--surface-2)}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--text-2);position:relative;cursor:pointer}
+.icon-btn .pip{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:#EF4444;border:2px solid #fff}
+.content{flex:1;overflow:auto;padding:24px 28px 28px}
+.statusbar{height:28px;flex:none;border-top:1px solid var(--line);background:#fff;display:flex;align-items:center;gap:18px;padding:0 20px;font-size:11.5px;color:var(--muted)}
+.statusbar .r{margin-left:auto;display:flex;gap:18px}
+
+/* ---------- Page header ---------- */
+.ph{display:flex;align-items:flex-end;gap:16px;margin-bottom:20px}
+.ph h1{font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:24px;font-weight:650;letter-spacing:-.3px}
+.ph p{color:var(--muted);margin-top:4px}
+.ph .actions{margin-left:auto;display:flex;gap:8px}
+
+/* ---------- Buttons ---------- */
+.btn{height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text-2);font:inherit;font-weight:600;display:inline-flex;align-items:center;gap:7px;cursor:pointer;box-shadow:var(--sh-1);white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:linear-gradient(180deg,#3B82F6,#2563EB);border-color:#1D4ED8;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.2) inset,0 4px 12px rgba(37,99,235,.3)}
+.btn.danger{color:var(--bad)}
+.btn.ghost{box-shadow:none;border-color:transparent;background:transparent}
+.btn.sm{height:30px;padding:0 10px;border-radius:8px;font-size:12.5px}
+.btn.block{width:100%;justify-content:center}
+
+/* ---------- Cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.card-h{display:flex;align-items:center;gap:10px;padding:16px 18px 6px}
+.card-h h3{font-size:14.5px;font-weight:650}
+.card-h .sub{color:var(--muted);font-size:12px}
+.card-h .r{margin-left:auto;display:flex;gap:6px;align-items:center}
+.card-b{padding:12px 18px 18px}
+.link{color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:3px}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.kpi{padding:18px;position:relative;overflow:hidden}
+.kpi .top{display:flex;align-items:center;gap:10px;color:var(--muted);font-weight:500}
+.kpi .tile{width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+.kpi .val{font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:26px;font-weight:650;letter-spacing:-.5px;margin:14px 0 6px}
+.kpi .val small{font-size:14px;color:var(--muted);font-weight:500;margin-left:3px}
+.kpi .foot{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.delta{display:inline-flex;align-items:center;gap:2px;font-weight:600;padding:1px 7px;border-radius:20px;font-size:11.5px}
+.delta.up{color:var(--ok);background:var(--ok-soft)}.delta.down{color:var(--bad);background:var(--bad-soft)}
+.kpi svg.spark{position:absolute;right:14px;bottom:16px;width:96px;height:36px}
+
+/* ---------- Pills ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-ok{color:#047857;background:var(--ok-soft)}.p-warn{color:#B45309;background:var(--warn-soft)}.p-bad{color:#B91C1C;background:var(--bad-soft)}
+.p-info{color:#0369A1;background:var(--info-soft)}.p-violet{color:#6D28D9;background:var(--violet-soft)}.p-mute{color:#475569;background:#EEF2F6}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:#F1F5F9;color:var(--text-2);font-size:11.5px;font-weight:500}
+
+/* ---------- Table ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0}
+.tbl th{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);font-weight:600;text-align:left;padding:11px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);position:sticky;top:0}
+.tbl td{white-space:nowrap;padding:11px 14px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.tbl tr:hover td{background:#FAFBFD}
+.tbl tr.sel td{background:#F2F7FF}
+.tbl tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.tbl .r{text-align:right}
+.prod{display:flex;align-items:center;gap:11px}
+.thumb{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none;font-weight:700;font-size:12px}
+.prod b{display:block;font-weight:600;max-width:270px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod small{color:var(--faint);font-family:Consolas,monospace;font-size:11.5px}
+.stock{display:flex;align-items:center;gap:9px}
+.bar{width:64px;height:6px;border-radius:6px;background:#EEF1F5;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px}
+.row-act{display:flex;gap:2px;justify-content:flex-end;opacity:.35}
+.tbl tr:hover .row-act,.tbl tr.sel .row-act{opacity:1}
+.row-act span{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.row-act span:hover{background:#EEF1F5;color:var(--text)}
+.tfoot{display:flex;align-items:center;padding:12px 16px;color:var(--muted);font-size:12.5px;gap:6px}
+.pager{margin-left:auto;display:flex;gap:4px}
+.pager span{min-width:30px;height:30px;border-radius:8px;display:grid;place-items:center;border:1px solid var(--line);background:#fff;font-weight:600;color:var(--text-2);padding:0 6px}
+.pager span.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ---------- Toolbar / filters ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.search{height:38px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--faint);width:320px;background:#fff}
+.search.focus{border-color:#93C5FD;box-shadow:0 0 0 4px rgba(59,130,246,.12);color:var(--text)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:#fff;font-weight:500;color:var(--text-2);display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px}
+.chip em{font-style:normal;color:var(--faint);font-size:11.5px}
+.chip.on{background:var(--text);border-color:var(--text);color:#fff}.chip.on em{color:#94A3B8}
+.tabs{display:flex;gap:2px;padding:0 16px;border-bottom:1px solid var(--line)}
+.tabs span{padding:13px 12px 11px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;display:flex;gap:7px;align-items:center;cursor:pointer}
+.tabs span em{font-style:normal;font-size:11px;background:#EEF1F5;color:var(--muted);padding:0 7px;border-radius:20px}
+.tabs span.on{color:var(--accent);border-color:var(--accent)}.tabs span.on em{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- Detail panel ---------- */
+.split{display:grid;grid-template-columns:1fr 372px;gap:16px;align-items:start}
+.detail{position:sticky;top:0}
+.dhero{padding:18px;border-bottom:1px solid var(--line)}
+.dhero .img{height:132px;border-radius:12px;background:radial-gradient(120% 120% at 20% 0%,#1E3A8A 0%,#172554 45%,#0B1120 100%);display:grid;place-items:center;color:#BFDBFE;margin-bottom:14px;position:relative;overflow:hidden}
+.dhero .img::after{content:"";position:absolute;inset:auto -30px -60px auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,.45),transparent 70%)}
+.dhero h2{font-size:16.5px;font-weight:650;line-height:1.3}
+.dhero .meta{display:flex;gap:6px;margin-top:8px;align-items:center}
+.price-row{display:flex;align-items:flex-end;gap:14px;margin-top:14px}
+.price-row .p{font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:24px;font-weight:700;color:var(--accent-ink);letter-spacing:-.4px}
+.price-row .m{font-size:12px;color:var(--muted);padding-bottom:5px}
+.price-row .m b{color:var(--ok)}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px}
+.spec{border:1px solid var(--line-2);background:var(--surface-2);border-radius:10px;padding:10px 11px;display:flex;gap:9px}
+.spec .ic{color:var(--accent);margin-top:1px}
+.spec small{display:block;color:var(--faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.spec span{display:block;font-weight:600;font-size:12.5px;margin-top:2px;line-height:1.35}
+.spec.wide{grid-column:span 2}
+.stockbox{margin:0 18px 16px;border-radius:12px;padding:12px 14px;background:var(--warn-soft);border:1px solid #FCE3B8;display:flex;gap:10px;align-items:center}
+.stockbox b{color:#92400E}.stockbox small{color:#B45309;display:block;font-size:12px}
+.dactions{display:flex;gap:8px;padding:0 18px 18px}
+
+/* ---------- Dashboard ---------- */
+.dgrid{display:grid;grid-template-columns:1.65fr 1fr;gap:16px;margin-bottom:16px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+.donut-wrap{display:flex;align-items:center;gap:22px;padding:8px 4px}
+.donut{width:150px;height:150px;border-radius:50%;position:relative;flex:none;
+  background:conic-gradient(#10B981 0 50%,#8B5CF6 50% 68%,#0EA5E9 68% 81.6%,#F59E0B 81.6% 90.6%,#EF4444 90.6% 100%)}
+.donut::after{content:"";position:absolute;inset:20px;background:#fff;border-radius:50%}
+.donut .c{position:absolute;inset:0;display:grid;place-items:center;z-index:1;text-align:center}
+.donut .c b{font-size:26px;font-weight:700;display:block;line-height:1}.donut .c small{color:var(--muted);font-size:11.5px}
+.dl{flex:1;display:flex;flex-direction:column;gap:9px}
+.dl div{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.dl i{width:9px;height:9px;border-radius:3px}
+.dl b{margin-left:auto;font-variant-numeric:tabular-nums}
+.dl span.pc{color:var(--faint);width:38px;text-align:right}
+.top5 li{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.top5 li:last-child{border:0}
+.rank{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-weight:700;font-size:12px;background:#F1F5F9;color:var(--muted);flex:none}
+.rank.g{background:#FEF3C7;color:#B45309}.rank.s{background:#E2E8F0;color:#475569}.rank.b{background:#FFEDD5;color:#C2410C}
+.top5 .nm{flex:1;min-width:0}
+.top5 .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top5 .nm .bar{width:100%;margin-top:6px;height:5px}
+.top5 .rv{text-align:right;font-weight:650}
+.top5 .rv small{display:block;color:var(--faint);font-weight:500;font-size:11.5px}
+.low li{list-style:none;display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.low li:last-child{border:0}
+.low .nm{flex:1;min-width:0}.low .nm b{display:block;font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.low .nm small{color:var(--faint);font-size:11.5px}
+.qty{font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.qty.w{color:var(--warn)}
+
+/* ---------- Orders ---------- */
+.timeline{padding:6px 18px 4px}
+.tl{display:flex;gap:12px;position:relative;padding-bottom:16px}
+.tl::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--line)}
+.tl:last-child::before{display:none}
+.tl .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--ok-soft);color:var(--ok);z-index:1}
+.tl.cur .n{background:var(--accent);color:#fff;box-shadow:0 0 0 4px var(--accent-soft)}
+.tl.todo .n{background:#F1F5F9;color:var(--faint)}
+.tl b{font-weight:600;display:block}.tl small{color:var(--muted);font-size:12px}
+.items{padding:4px 18px 8px}
+.item{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.item .nm{flex:1;min-width:0}.item .nm b{display:block;font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .nm small{color:var(--faint);font-size:11.5px}
+.sum{padding:10px 18px 16px}
+.sum div{display:flex;justify-content:space-between;padding:4px 0;color:var(--muted)}
+.sum div b{color:var(--text);font-variant-numeric:tabular-nums;font-weight:600}
+.sum .total{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;color:var(--text);font-weight:600}
+.sum .total b{font-size:18px;color:var(--accent-ink);font-weight:700}
+.cust{display:flex;gap:10px;align-items:center}
+.cust .avatar{width:30px;height:30px;font-size:11.5px}
+.cust small{display:block;color:var(--faint);font-size:11.5px}
+
+/* ---------- POS ---------- */
+.pos{display:grid;grid-template-columns:1fr 420px;gap:16px;height:100%}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px}
+.pcard{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer;position:relative}
+.pcard:hover{border-color:#BFDBFE;box-shadow:var(--sh-2)}
+.pcard.in{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.pcard .pimg{height:86px;border-radius:10px;display:grid;place-items:center;margin-bottom:10px}
+.pcard b{display:block;font-weight:600;font-size:12.5px;line-height:1.35;height:34px;overflow:hidden}
+.pcard .pr{display:flex;align-items:center;margin-top:8px}
+.pcard .pr span{font-weight:700;color:var(--accent-ink)}
+.pcard .pr small{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.pcard .add{position:absolute;top:18px;right:18px;width:28px;height:28px;border-radius:8px;background:#fff;display:grid;place-items:center;color:var(--accent);box-shadow:var(--sh-2)}
+.pcard.in .add{background:var(--accent);color:#fff}
+.cart{display:flex;flex-direction:column;height:100%}
+.field{margin:0 18px 12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.input{height:40px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;gap:9px;padding:0 12px;background:#fff}
+.input .ic{color:var(--faint)}
+.citem{display:flex;gap:10px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--line-2)}
+.citem .nm{flex:1;min-width:0}.citem .nm b{display:block;font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.citem .nm small{color:var(--muted);font-size:12px}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;height:30px}
+.stepper span{width:26px;text-align:center;color:var(--muted);cursor:pointer}
+.stepper b{width:26px;text-align:center;font-weight:600}
+.pay{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 18px 14px}
+.pay span{border:1px solid var(--line);border-radius:10px;height:40px;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:600;color:var(--text-2);font-size:12.5px;cursor:pointer}
+.pay span.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.checkout{margin-top:auto;border-top:1px solid var(--line);background:var(--surface-2);border-radius:0 0 16px 16px}
+.btn.xl{height:48px;font-size:14.5px;border-radius:12px}
+.warnline{margin:0 18px 12px;padding:9px 12px;border-radius:10px;background:var(--bad-soft);color:#B91C1C;font-size:12.5px;display:flex;gap:8px;align-items:center}
+
+/* ---------- AI ---------- */
+.ai{display:grid;grid-template-columns:1fr 300px;gap:16px;height:100%}
+.chat{display:flex;flex-direction:column;height:100%}
+.msgs{flex:1;overflow:auto;padding:22px 26px;display:flex;flex-direction:column;gap:18px}
+.msg{display:flex;gap:12px;max-width:82%}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.bubble{padding:12px 15px;border-radius:14px;line-height:1.55;background:var(--surface-2);border:1px solid var(--line)}
+.msg.me .bubble{background:var(--accent);color:#fff;border-color:var(--accent);border-top-right-radius:4px}
+.msg.bot .bubble{border-top-left-radius:4px}
+.bot-av{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#60A5FA,#2563EB);display:grid;place-items:center;color:#fff;flex:none}
+.tool{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-family:Consolas,monospace;color:var(--violet);background:var(--violet-soft);padding:3px 9px;border-radius:6px;margin-bottom:8px}
+.mini{width:100%;margin-top:10px;border-collapse:collapse;font-size:12.5px;background:#fff;border-radius:8px;overflow:hidden}
+.mini td{padding:7px 10px;border-top:1px solid var(--line-2)}
+.mini td:last-child{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.composer{margin:0 22px 20px;border:1px solid var(--line);border-radius:14px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-2);background:#fff}
+.composer .ph-t{flex:1;color:var(--faint)}
+.sugg{display:flex;flex-direction:column;gap:8px;padding:6px 16px 16px}
+.sugg div{border:1px solid var(--line);border-radius:12px;padding:11px 12px;display:flex;gap:10px;cursor:pointer}
+.sugg div:hover{border-color:#BFDBFE;background:#F5F9FF}
+.sugg .ic{color:var(--accent);margin-top:1px}
+.sugg b{display:block;font-weight:600;font-size:12.5px}.sugg small{color:var(--muted);font-size:11.5px}
+.perm{margin:0 16px 16px;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.perm b{color:var(--text);display:block;margin-bottom:6px;font-size:12.5px}
+.perm div{display:flex;justify-content:space-between;padding:3px 0}
+
+/* ---------- Customers ---------- */
+.profile{padding:20px 18px;text-align:center;border-bottom:1px solid var(--line)}
+.profile .avatar{width:64px;height:64px;font-size:20px;margin:0 auto 10px}
+.tier{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:linear-gradient(90deg,#FEF3C7,#FDE68A);color:#92400E;margin-top:8px}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.pstats div{padding:12px;text-align:center;border-right:1px solid var(--line)}.pstats div:last-child{border:0}
+.pstats b{display:block;font-size:15px;font-weight:700}.pstats small{color:var(--muted);font-size:11.5px}
+.kv{padding:12px 18px;display:flex;flex-direction:column;gap:9px}
+.kv div{display:flex;gap:10px;align-items:center;font-size:12.5px}.kv .ic{color:var(--faint)}
+
+/* ---------- Login ---------- */
+.login{flex:1;display:grid;grid-template-columns:1.1fr 1fr;background:#fff}
+.login .hero{background:radial-gradient(90% 70% at 15% 10%,#1E40AF 0%,transparent 60%),radial-gradient(70% 60% at 100% 100%,#0369A1 0%,transparent 60%),#0B1120;color:#fff;padding:48px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.login .hero .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(circle at 30% 40%,#000,transparent 75%)}
+.login .hero > *{position:relative}
+.login h1{font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:40px;line-height:1.15;font-weight:650;letter-spacing:-1px;margin-top:auto}
+.login h1 span{background:linear-gradient(90deg,#93C5FD,#7DD3FC);-webkit-background-clip:text;color:transparent}
+.login .hero p{color:#A5B1C6;font-size:15px;margin-top:14px;max-width:440px;line-height:1.6}
+.hstats{display:flex;gap:28px;margin-top:34px}
+.hstats b{display:block;font-size:24px;font-weight:700}.hstats small{color:#7E8BA3}
+.hero .team{margin-top:auto;color:#56647D;font-size:12px}
+.lform{display:flex;flex-direction:column;justify-content:center;padding:0 88px}
+.lform h2{font-size:26px;font-weight:650;letter-spacing:-.4px}
+.lform > p{color:var(--muted);margin:6px 0 26px}
+.lform .field{margin:0 0 14px}
+.lform .input{height:44px}
+.roles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.role{border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer}
+.role.on{border-color:var(--accent);background:var(--accent-soft)}
+.role .ri{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;margin:0 auto 6px}
+.role b{font-size:12px;display:block}.role small{font-size:10.5px;color:var(--muted)}
+.lseg{display:flex;background:#F1F5F9;border-radius:10px;padding:4px;gap:4px;margin-bottom:22px}
+.lseg span{flex:1;padding:9px;border-radius:8px;text-align:center;font-weight:600;color:var(--muted);display:flex;gap:7px;align-items:center;justify-content:center;font-size:12.5px}
+.lseg span.on{background:#fff;color:var(--text);box-shadow:var(--sh-1)}
+.row{display:flex;align-items:center;justify-content:space-between;margin:2px 0 20px;font-size:12.5px;color:var(--muted)}
+.check{display:flex;gap:8px;align-items:center}.check i{width:16px;height:16px;border-radius:5px;background:var(--accent);display:grid;place-items:center;color:#fff}
+
+/* ---------- Mockup navigator (not part of app) ---------- */
+.mnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-radius:14px;padding:6px;display:flex;gap:4px;z-index:99;box-shadow:var(--sh-3)}
+.mnav a{color:#94A3B8;font-size:12px;padding:7px 12px;border-radius:9px;cursor:pointer;font-weight:600;text-decoration:none}
+.mnav a.on{background:#fff;color:#0F172A}
+.mnav .lbl{color:#56647D;font-size:11px;padding:7px 8px 7px 10px;letter-spacing:.6px}
+section[data-screen]{display:none}
+section[data-screen].show{display:block}
+.fill{height:100%}
+</style>
+</head>
+<body>
+
+<!-- ============ ICONS ============ -->
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a5.5 5.5 0 0 1 3.5 6"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1.5 1.5 0 0 0 1.5 1.1h8.6a1.5 1.5 0 0 0 1.5-1.2L21 8H6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M4 4v4h4M20 20v-4h-4"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6 8v5l-4 2v-7z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></symbol>
+  <symbol id="i-ram" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="1.5"/><path d="M6 11v2M10 11v2M14 11v2M18 11v2M5 17v2M19 17v2"/></symbol>
+  <symbol id="i-disk" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 13h18"/><circle cx="17" cy="16" r=".6"/></symbol>
+  <symbol id="i-gpu" viewBox="0 0 24 24"><rect x="2" y="6" width="18" height="11" rx="1.5"/><circle cx="9" cy="11.5" r="3"/><circle cx="15.5" cy="11.5" r="1.5"/><path d="M20 9h2M6 17v3"/></symbol>
+  <symbol id="i-screen" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.5"/><path d="M4 5.5v13c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-13M4 12c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h12v10H2zM14 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+  <symbol id="i-dn" viewBox="0 0 24 24"><path d="M7 7l10 10M17 9v8H9"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5z"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8" r="1.3"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
+  <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v3"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zM12 8s2-5 4.5-3.5S15 8 12 8z"/></symbol>
+ </defs>
+</svg>
+
+<div class="window">
+ <div class="titlebar"><span class="logo-dot"></span>TechGear Laptop Store
+  <div class="ctrls"><span>&#8212;</span><span>&#9744;</span><span>&#10005;</span></div>
+ </div>
+
+ <!-- ===================== LOGIN ===================== -->
+ <section data-screen="login" class="fill">
+  <div class="app fill">
+   <div class="login">
+    <div class="hero">
+     <div class="grid-bg"></div>
+     <div class="brand" style="padding:0">
+      <div class="mark"><svg class="ic"><use href="#i-laptop"/></svg></div>
+      <div><b>TechGear</b><small>Laptop &amp; Hardware Store</small></div>
+     </div>
+     <h1>Quản lý cửa hàng laptop<br><span>gọn gàng, rõ ràng, nhanh.</span></h1>
+     <p>Sản phẩm, tồn kho, đơn hàng, khách hàng và báo cáo doanh thu — tất cả trong một màn hình, kèm trợ lý AI tuân thủ phân quyền.</p>
+     <div class="hstats">
+      <div><b class="num">24</b><small>Sản phẩm</small></div>
+      <div><b class="num">22</b><small>Đơn hàng</small></div>
+      <div><b class="num">12</b><small>Khách hàng</small></div>
+     </div>
+     <div class="team">Đồ án UDQL2 2026 · Nhóm 23120068 · 23120069 · 23210078</div>
+    </div>
+    <div class="lform">
+     <h2 style="margin-bottom:24px">Đăng nhập</h2>
+     <div class="field"><label>Tên đăng nhập</label><div class="input"><svg class="ic sm"><use href="#i-user"/></svg><span>admin</span></div></div>
+     <div class="field"><label>Mật khẩu</label><div class="input"><svg class="ic sm"><use href="#i-lock"/></svg><span style="letter-spacing:3px">•••••••••</span><svg class="ic sm" style="margin-left:auto"><use href="#i-eye"/></svg></div></div>
+     <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin:4px 0 6px">Kiến trúc kết nối</label>
+     <div class="lseg">
+      <span class="on"><svg class="ic sm"><use href="#i-db"/></svg>Direct Database · Giữa kỳ</span>
+      <span><svg class="ic sm"><use href="#i-cloud"/></svg>Web API · Cuối kỳ</span>
+     </div>
+     <div class="row"><span class="check"><i><svg class="ic sm" style="width:11px;height:11px;stroke-width:3"><use href="#i-check"/></svg></i>Ghi nhớ đăng nhập</span><span class="link">Kiểm tra kết nối</span></div>
+     <button class="btn primary block xl" data-go="dashboard">Đăng nhập<svg class="ic sm"><use href="#i-right"/></svg></button>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <!-- ===================== APP SHELL ===================== -->
+ <section data-screen="shell" class="fill" id="shell" style="flex:1;min-height:0">
+ <div class="app fill">
+  <aside class="side">
+   <div class="brand">
+    <div class="mark"><svg class="ic"><use href="#i-laptop"/></svg></div>
+    <div><b>TechGear</b><small>Laptop Store</small></div>
+   </div>
+   <div class="nav">
+    <div class="nav-label">Tổng quan</div>
+    <a data-go="dashboard"><svg class="ic"><use href="#i-dash"/></svg>Bảng điều khiển</a>
+    <a data-go="ai"><svg class="ic"><use href="#i-spark"/></svg>Trợ lý AI<span class="badge" style="background:rgba(59,130,246,.2);color:#BFDBFE">Beta</span></a>
+    <div class="nav-label">Bán hàng</div>
+    <a data-go="pos"><svg class="ic"><use href="#i-cart"/></svg>Bán hàng (POS)</a>
+    <a data-go="orders"><svg class="ic"><use href="#i-receipt"/></svg>Đơn hàng<span class="badge hot">4</span></a>
+    <a data-go="customers"><svg class="ic"><use href="#i-users"/></svg>Khách hàng<span class="badge">12</span></a>
+    <div class="nav-label">Kho hàng</div>
+    <a data-go="products"><svg class="ic"><use href="#i-laptop"/></svg>Sản phẩm<span class="badge">24</span></a>
+    <a data-go="products"><svg class="ic"><use href="#i-folder"/></svg>Danh mục<span class="badge">5</span></a>
+   </div>
+   <div class="side-foot">
+    <div class="mode-card">
+     <div class="t"><span>Kiến trúc kết nối</span><span><span class="dot"></span>&nbsp;Online</span></div>
+     <div class="seg"><span class="on"><svg class="ic sm"><use href="#i-db"/></svg>Direct DB</span><span><svg class="ic sm"><use href="#i-cloud"/></svg>Web API</span></div>
+     <div class="flow">App <svg class="ic sm" style="width:12px"><use href="#i-right"/></svg> SQLite · laptopstore.db</div>
+    </div>
+    <div class="user">
+     <div class="avatar">QT</div>
+     <div><b>Nguyễn Văn Quản Trị</b><small>Admin</small></div>
+     <svg class="ic sm" data-go="login" style="cursor:pointer"><use href="#i-logout"/></svg>
+    </div>
+   </div>
+  </aside>
+
+  <div class="main">
+   <div class="topbar">
+    <div class="crumb" id="crumb">TechGear <svg class="ic sm"><use href="#i-right"/></svg><b>Bảng điều khiển</b></div>
+    <div class="gsearch"><svg class="ic sm"><use href="#i-search"/></svg>Tìm sản phẩm, đơn hàng, khách hàng…<span class="kbd">Ctrl K</span></div>
+    <div class="icon-btn"><svg class="ic sm"><use href="#i-bell"/></svg><span class="pip"></span></div>
+    <button class="btn primary" data-go="pos"><svg class="ic sm"><use href="#i-plus"/></svg>Tạo đơn</button>
+   </div>
+
+   <div class="content">
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section data-screen="dashboard">
+     <div class="ph">
+      <div><h1>Chào buổi sáng, Quản Trị 👋</h1><p>Tình hình kinh doanh hôm nay · Thứ Bảy, 31/10/2026</p></div>
+      <div class="actions">
+       <button class="btn"><svg class="ic sm"><use href="#i-clock"/></svg>30 ngày qua<svg class="ic sm"><use href="#i-down"/></svg></button>
+       <button class="btn"><svg class="ic sm"><use href="#i-dl"/></svg>Xuất báo cáo</button>
+      </div>
+     </div>
+     <div class="kpis">
+      <div class="card kpi">
+       <div class="top"><div class="tile" style="background:var(--accent-soft);color:var(--accent)"><svg class="ic sm"><use href="#i-chart"/></svg></div>Tổng doanh thu</div>
+       <div class="val num">1,26<small>tỷ đ</small></div>
+       <div class="foot"><span class="delta up"><svg class="ic sm" style="width:12px"><use href="#i-up"/></svg>12,4%</span>so với kỳ trước</div>
+       <svg class="spark" viewBox="0 0 96 36"><path d="M0 30 L12 26 L24 28 L36 20 L48 22 L60 14 L72 16 L84 8 L96 6" fill="none" stroke="#3B82F6" stroke-width="2"/></svg>
+      </div>
+      <div class="card kpi">
+       <div class="top"><div class="tile" style="background:var(--ok-soft);color:var(--ok)"><svg class="ic sm"><use href="#i-cash"/></svg></div>Doanh thu tháng 10</div>
+       <div class="val num">286,4<small>tr đ</small></div>
+       <div class="foot"><span class="delta up"><svg class="ic sm" style="width:12px"><use href="#i-up"/></svg>8,1%</span>so với tháng 9</div>
+       <svg class="spark" viewBox="0 0 96 36"><path d="M0 26 L12 28 L24 22 L36 24 L48 16 L60 18 L72 12 L84 14 L96 8" fill="none" stroke="#10B981" stroke-width="2"/></svg>
+      </div>
+      <div class="card kpi">
+       <div class="top"><div class="tile" style="background:var(--info-soft);color:var(--info)"><svg class="ic sm"><use href="#i-receipt"/></svg></div>Đơn hàng</div>
+       <div class="val num">22<small>đơn</small></div>
+       <div class="foot"><span class="pill p-ok" style="padding:1px 8px 1px 7px;font-size:11.5px">11 hoàn tất</span><span class="pill p-warn" style="padding:1px 8px 1px 7px;font-size:11.5px">4 chờ xử lý</span></div>
+      </div>
+      <div class="card kpi" style="border-color:#FCE3B8">
+       <div class="top"><div class="tile" style="background:var(--warn-soft);color:var(--warn)"><svg class="ic sm"><use href="#i-alert"/></svg></div>Sắp hết hàng</div>
+       <div class="val num" style="color:#B45309">6<small>sản phẩm</small></div>
+       <div class="foot"><span class="link">Xem &amp; lập phiếu nhập <svg class="ic sm" style="width:13px"><use href="#i-right"/></svg></span></div>
+      </div>
+     </div>
+
+     <div class="dgrid">
+      <div class="card">
+       <div class="card-h"><h3>Doanh thu 12 tháng</h3><span class="sub">· triệu đồng</span>
+        <div class="r legend"><span><i style="background:#3B82F6"></i>Doanh thu</span><span><i style="background:#BFDBFE"></i>Lợi nhuận gộp</span></div></div>
+       <div class="card-b"><svg id="rev" viewBox="0 0 760 250" style="width:100%;height:250px"></svg></div>
+      </div>
+      <div class="card">
+       <div class="card-h"><h3>Trạng thái đơn hàng</h3><div class="r"><span class="link" data-go="orders">Chi tiết</span></div></div>
+       <div class="card-b">
+        <div class="donut-wrap">
+         <div class="donut"><div class="c"><div><b class="num">22</b><small>đơn hàng</small></div></div></div>
+         <div class="dl">
+          <div><i style="background:#10B981"></i>Hoàn thành<b>11</b><span class="pc">50%</span></div>
+          <div><i style="background:#8B5CF6"></i>Đang xử lý<b>4</b><span class="pc">18%</span></div>
+          <div><i style="background:#0EA5E9"></i>Đang giao<b>3</b><span class="pc">14%</span></div>
+          <div><i style="background:#F59E0B"></i>Chờ xác nhận<b>2</b><span class="pc">9%</span></div>
+          <div><i style="background:#EF4444"></i>Đã hủy<b>2</b><span class="pc">9%</span></div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+
+     <div class="dgrid" style="grid-template-columns:1.65fr 1fr;margin:0">
+      <div class="card">
+       <div class="card-h"><h3>Top 5 bán chạy</h3><span class="sub">· theo doanh thu</span><div class="r"><span class="link" data-go="products">Tất cả sản phẩm</span></div></div>
+       <div class="card-b" style="padding-top:2px"><ul class="top5">
+        <li><span class="rank g">1</span><div class="nm"><b>ASUS ROG Zephyrus G16 (2026)</b><div class="bar"><i style="width:100%;background:#3B82F6"></i></div></div><div class="rv num">211,96 tr<small>4 chiếc</small></div></li>
+        <li><span class="rank s">2</span><div class="nm"><b>Apple MacBook Pro 14 M3 Pro</b><div class="bar"><i style="width:71%;background:#60A5FA"></i></div></div><div class="rv num">149,97 tr<small>3 chiếc</small></div></li>
+        <li><span class="rank b">3</span><div class="nm"><b>Dell XPS 15 9530 OLED</b><div class="bar"><i style="width:56%;background:#93C5FD"></i></div></div><div class="rv num">117,98 tr<small>2 chiếc</small></div></li>
+        <li><span class="rank">4</span><div class="nm"><b>Lenovo Legion Pro 5 16IRX9</b><div class="bar"><i style="width:54%;background:#BFDBFE"></i></div></div><div class="rv num">115,47 tr<small>3 chiếc</small></div></li>
+        <li><span class="rank">5</span><div class="nm"><b>Lenovo ThinkPad X1 Carbon Gen 12</b><div class="bar"><i style="width:44%;background:#BFDBFE"></i></div></div><div class="rv num">93,98 tr<small>2 chiếc</small></div></li>
+       </ul></div>
+      </div>
+      <div class="card">
+       <div class="card-h"><h3>Cảnh báo tồn kho</h3><span class="pill p-warn" style="margin-left:4px">6</span><div class="r"><button class="btn sm">Nhập hàng</button></div></div>
+       <div class="card-b" style="padding-top:2px"><ul class="low">
+        <li><div class="thumb" style="background:#FDECEC;color:#DC2626">SS</div><div class="nm"><b>Ổ cứng SSD Kingston KC3000 1TB</b><small>COMP-SSD-KC3000-1T</small></div><span class="qty">2 / 5</span></li>
+        <li><div class="thumb" style="background:#FDECEC;color:#DC2626">DL</div><div class="nm"><b>Dell Precision 7680 Workstation</b><small>LAP-DELL-P7680-12</small></div><span class="qty">3 / 5</span></li>
+        <li><div class="thumb" style="background:#FEF4E2;color:#D97706">LN</div><div class="nm"><b>Lenovo ThinkPad P16 Gen 2</b><small>LAP-TP-P16G2-13</small></div><span class="qty w">4 / 5</span></li>
+        <li><div class="thumb" style="background:#FEF4E2;color:#D97706">MS</div><div class="nm"><b>MSI Katana 15 B13VFK</b><small>LAP-MSI-K15-04</small></div><span class="qty w">4 / 5</span></li>
+       </ul></div>
+      </div>
+     </div>
+    </section>
+
+    <!-- ===================== PRODUCTS ===================== -->
+    <section data-screen="products">
+     <div class="ph">
+      <div><h1>Sản phẩm</h1><p>24 sản phẩm · 5 danh mục · Tổng giá trị tồn kho <b class="num" style="color:var(--text)">7,84 tỷ đ</b></p></div>
+      <div class="actions">
+       <button class="btn"><svg class="ic sm"><use href="#i-dl"/></svg>Xuất Excel</button>
+       <button class="btn primary"><svg class="ic sm"><use href="#i-plus"/></svg>Thêm sản phẩm</button>
+      </div>
+     </div>
+     <div class="split">
+      <div class="card" style="overflow:hidden">
+       <div class="toolbar">
+        <div class="search focus"><svg class="ic sm"><use href="#i-search"/></svg><span style="color:var(--faint)">Tìm theo tên, SKU, hãng, CPU, GPU…</span></div>
+        <button class="btn"><svg class="ic sm"><use href="#i-filter"/></svg>Bộ lọc<span class="tag" style="background:var(--accent-soft);color:var(--accent)">1</span></button>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12.5px">Sắp xếp: <b style="color:var(--text)">Mới nhất</b><svg class="ic sm"><use href="#i-down"/></svg></div>
+       </div>
+       <div class="toolbar" style="padding:10px 16px">
+        <div class="chips">
+         <span class="chip on">Tất cả <em>24</em></span>
+         <span class="chip">Gaming <em>5</em></span>
+         <span class="chip">Doanh nhân &amp; Mỏng nhẹ <em>6</em></span>
+         <span class="chip">Đồ họa &amp; Workstation <em>3</em></span>
+         <span class="chip">Linh kiện <em>6</em></span>
+         <span class="chip">Phụ kiện <em>4</em></span>
+         <span class="chip" style="border-style:dashed;color:#B45309;border-color:#FCD9A0;background:#FFFBF2"><svg class="ic sm" style="width:13px"><use href="#i-alert"/></svg>Sắp hết hàng <em>6</em></span>
+        </div>
+       </div>
+       <table class="tbl">
+        <thead><tr><th style="width:38%">Sản phẩm</th><th>Hãng</th><th class="r">Giá bán</th><th>Tồn kho</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody id="prows"></tbody>
+       </table>
+       <div class="tfoot">Hiển thị <b style="color:var(--text)">1–9</b> trên 24 sản phẩm
+        <div class="pager"><span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span></div></div>
+      </div>
+
+      <div class="card detail" style="overflow:hidden">
+       <div class="dhero">
+        <div class="img"><svg class="ic" style="width:64px;height:64px;stroke-width:1.2"><use href="#i-laptop"/></svg></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><h2>Dell XPS 15 9530 OLED</h2><svg class="ic" style="margin-left:auto;color:var(--faint)"><use href="#i-x"/></svg></div>
+        <div class="meta"><span class="tag" style="font-family:Consolas,monospace">LAP-DELL-XPS15-08</span><span class="tag">Dell</span><span class="pill p-ok">Đang bán</span></div>
+        <div class="price-row"><div class="p num">58.990.000 đ</div><div class="m">Giá vốn 50.000.000 đ · Lãi <b>15,2%</b></div></div>
+       </div>
+       <div class="specs">
+        <div class="spec wide"><svg class="ic sm"><use href="#i-cpu"/></svg><div><small>CPU</small><span>Intel Core i7-13700H (14 Cores, 20 Threads)</span></div></div>
+        <div class="spec"><svg class="ic sm"><use href="#i-ram"/></svg><div><small>RAM</small><span>32GB DDR5 4800MHz</span></div></div>
+        <div class="spec"><svg class="ic sm"><use href="#i-disk"/></svg><div><small>Ổ cứng</small><span>1TB PCIe NVMe SSD</span></div></div>
+        <div class="spec wide"><svg class="ic sm"><use href="#i-gpu"/></svg><div><small>GPU</small><span>NVIDIA GeForce RTX 4060 8GB</span></div></div>
+        <div class="spec wide"><svg class="ic sm"><use href="#i-screen"/></svg><div><small>Màn hình</small><span>15.6 inch 3.5K OLED cảm ứng</span></div></div>
+        <div class="spec"><svg class="ic sm"><use href="#i-shield"/></svg><div><small>Bảo hành</small><span>24 tháng</span></div></div>
+        <div class="spec"><svg class="ic sm"><use href="#i-tag"/></svg><div><small>Danh mục</small><span>Doanh nhân</span></div></div>
+       </div>
+       <div class="stockbox" style="background:var(--ok-soft);border-color:#BDEBD7">
+        <svg class="ic" style="color:var(--ok)"><use href="#i-box"/></svg>
+        <div style="flex:1"><b style="color:#065F46">6 chiếc trong kho</b><small style="color:#047857">Ngưỡng cảnh báo: 5 · Đã bán 2 trong 30 ngày</small></div>
+       </div>
+       <div class="dactions">
+        <button class="btn" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-edit"/></svg>Chỉnh sửa</button>
+        <button class="btn" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-box"/></svg>Nhập kho</button>
+        <button class="btn danger"><svg class="ic sm"><use href="#i-trash"/></svg></button>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- ===================== ORDERS ===================== -->
+    <section data-screen="orders">
+     <div class="ph">
+      <div><h1>Đơn hàng</h1><p>Theo dõi vòng đời đơn, cập nhật trạng thái và hoàn kho khi hủy</p></div>
+      <div class="actions">
+       <button class="btn"><svg class="ic sm"><use href="#i-clock"/></svg>Tháng 10/2026<svg class="ic sm"><use href="#i-down"/></svg></button>
+       <button class="btn primary" data-go="pos"><svg class="ic sm"><use href="#i-plus"/></svg>Lập đơn mới</button>
+      </div>
+     </div>
+     <div class="split">
+      <div class="card" style="overflow:hidden">
+       <div class="tabs">
+        <span class="on">Tất cả <em>22</em></span><span>Chờ xác nhận <em>2</em></span><span>Đang xử lý <em>4</em></span><span>Đang giao <em>3</em></span><span>Hoàn thành <em>11</em></span><span>Đã hủy <em>2</em></span>
+       </div>
+       <div class="toolbar" style="border-bottom:0">
+        <div class="search"><svg class="ic sm"><use href="#i-search"/></svg>Mã đơn, tên hoặc SĐT khách…</div>
+        <span class="chip"><svg class="ic sm" style="width:13px"><use href="#i-card"/></svg>Thanh toán: Tất cả<svg class="ic sm" style="width:13px"><use href="#i-down"/></svg></span>
+       </div>
+       <table class="tbl">
+        <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày tạo</th><th class="r">Thành tiền</th><th>Thanh toán</th><th>Trạng thái</th></tr></thead>
+        <tbody id="orows"></tbody>
+       </table>
+       <div class="tfoot">Hiển thị <b style="color:var(--text)">1–9</b> trên 22 đơn<div class="pager"><span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span></div></div>
+      </div>
+
+      <div class="card detail" style="overflow:hidden">
+       <div class="dhero" style="padding-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-family:Consolas,monospace;font-weight:700;font-size:15px">ORD-2610-0021</span><span class="pill p-violet">Đang xử lý</span><svg class="ic" style="margin-left:auto;color:var(--faint)"><use href="#i-x"/></svg></div>
+        <div class="cust" style="margin-top:14px"><div class="avatar" style="background:linear-gradient(135deg,#34D399,#0EA5E9)">MK</div><div><b>Trần Minh Khoa</b><small>0938 112 456 · Thành viên Vàng</small></div></div>
+       </div>
+       <div class="timeline" style="padding-top:16px">
+        <div class="tl"><div class="n"><svg class="ic sm"><use href="#i-check"/></svg></div><div><b>Tạo đơn tại quầy</b><small>30/10 · 14:22 · Lê Hoàng Bán Hàng</small></div></div>
+        <div class="tl cur"><div class="n"><svg class="ic sm"><use href="#i-clock"/></svg></div><div><b>Đang xử lý</b><small>30/10 · 15:05 · Kiểm tra máy &amp; cài đặt</small></div></div>
+        <div class="tl todo"><div class="n"><svg class="ic sm"><use href="#i-truck"/></svg></div><div><b>Giao hàng</b><small>Chưa bắt đầu</small></div></div>
+       </div>
+       <div class="items">
+        <div class="item"><div class="thumb" style="background:#EFF6FF;color:#2563EB;width:34px;height:34px">AS</div><div class="nm"><b>ASUS ROG Zephyrus G16 (2026)</b><small>1 × 52.990.000 đ</small></div><b class="num">52.990.000</b></div>
+        <div class="item"><div class="thumb" style="background:#F1EBFE;color:#7C3AED;width:34px;height:34px">KF</div><div class="nm"><b>RAM Kingston Fury Impact 32GB</b><small>1 × 2.850.000 đ</small></div><b class="num">2.850.000</b></div>
+       </div>
+       <div class="sum">
+        <div>Tạm tính<b>55.840.000 đ</b></div>
+        <div>Giảm giá<b style="color:var(--ok)">− 840.000 đ</b></div>
+        <div class="total">Khách trả · Chuyển khoản<b>55.000.000 đ</b></div>
+       </div>
+       <div class="dactions">
+        <button class="btn primary" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-truck"/></svg>Chuyển sang Đang giao</button>
+        <button class="btn"><svg class="ic sm"><use href="#i-more"/></svg></button>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- ===================== POS ===================== -->
+    <section data-screen="pos" style="height:100%">
+     <div class="pos">
+      <div class="card" style="overflow:hidden">
+       <div class="toolbar">
+        <div class="search focus" style="flex:1;width:auto"><svg class="ic sm"><use href="#i-search"/></svg><span style="color:var(--text)">rog</span><span class="kbd">F2</span></div>
+        <button class="btn"><svg class="ic sm"><use href="#i-filter"/></svg>Lọc</button>
+       </div>
+       <div class="toolbar" style="padding:10px 16px"><div class="chips">
+        <span class="chip on">Tất cả</span><span class="chip">Gaming</span><span class="chip">Doanh nhân</span><span class="chip">Workstation</span><span class="chip">Linh kiện</span><span class="chip">Phụ kiện</span></div></div>
+       <div class="pgrid" id="pgrid"></div>
+      </div>
+
+      <div class="card cart">
+       <div class="card-h" style="padding-bottom:14px"><h3>Đơn hàng mới</h3><span class="sub">· POS</span><div class="r"><span class="link" style="color:var(--bad)">Xóa tất cả</span></div></div>
+       <div class="field"><label>Khách hàng</label>
+        <div class="input"><div class="avatar" style="width:26px;height:26px;font-size:10.5px;background:linear-gradient(135deg,#34D399,#0EA5E9)">MK</div><div style="flex:1"><b style="font-weight:600">Trần Minh Khoa</b> <span style="color:var(--muted);font-size:12px">· 0938 112 456</span></div><span class="tier" style="margin:0">★ Vàng</span></div></div>
+       <div style="border-top:1px solid var(--line)">
+        <div class="citem"><div class="thumb" style="background:#EFF6FF;color:#2563EB;width:36px;height:36px">AS</div><div class="nm"><b>ASUS ROG Zephyrus G16 (2026)</b><small class="num">52.990.000 đ</small></div><div class="stepper"><span>−</span><b>1</b><span>+</span></div></div>
+        <div class="citem"><div class="thumb" style="background:#F1EBFE;color:#7C3AED;width:36px;height:36px">KF</div><div class="nm"><b>RAM Kingston Fury Impact 32GB DDR5</b><small class="num">2.850.000 đ</small></div><div class="stepper"><span>−</span><b>1</b><span>+</span></div></div>
+        <div class="citem"><div class="thumb" style="background:#FEF4E2;color:#D97706;width:36px;height:36px">LG</div><div class="nm"><b>Chuột không dây Logitech MX Master 3S</b><small class="num">2.290.000 đ</small></div><div class="stepper"><span>−</span><b>2</b><span>+</span></div></div>
+       </div>
+       <div class="warnline" style="margin-top:12px"><svg class="ic sm"><use href="#i-alert"/></svg>Logitech MX Master 3S chỉ còn 2 chiếc trong kho — đã đạt số lượng tối đa.</div>
+       <div class="checkout">
+        <div style="padding-top:14px"><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 18px 8px">Thanh toán</label>
+        <div class="pay"><span class="on"><svg class="ic sm"><use href="#i-bank"/></svg>Chuyển khoản</span><span><svg class="ic sm"><use href="#i-cash"/></svg>Tiền mặt</span><span><svg class="ic sm"><use href="#i-card"/></svg>Thẻ</span></div></div>
+        <div class="sum" style="padding-top:0">
+         <div>Tạm tính (4 sản phẩm)<b>60.420.000 đ</b></div>
+         <div>Giảm giá <span class="link" style="margin-left:6px">Sửa</span><b style="color:var(--ok)">− 420.000 đ</b></div>
+         <div>Điểm thưởng nhận được<b style="color:var(--warn)">+ 600 điểm</b></div>
+         <div class="total">Khách cần trả<b>60.000.000 đ</b></div>
+        </div>
+        <div style="padding:0 18px 18px"><button class="btn primary block xl"><svg class="ic"><use href="#i-check"/></svg>Xác nhận thanh toán<span class="kbd" style="margin-left:8px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#DBEAFE">F9</span></button></div>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- ===================== CUSTOMERS ===================== -->
+    <section data-screen="customers">
+     <div class="ph">
+      <div><h1>Khách hàng</h1><p>12 thành viên · Tổng chi tiêu <b class="num" style="color:var(--text)">1,26 tỷ đ</b></p></div>
+      <div class="actions"><button class="btn primary"><svg class="ic sm"><use href="#i-plus"/></svg>Thêm khách hàng</button></div>
+     </div>
+     <div class="split">
+      <div class="card" style="overflow:hidden">
+       <div class="toolbar">
+        <div class="search"><svg class="ic sm"><use href="#i-search"/></svg>Tìm theo tên hoặc số điện thoại…</div>
+        <div class="chips" style="margin-left:auto"><span class="chip on">Tất cả</span><span class="chip">★ Kim cương</span><span class="chip">Vàng</span><span class="chip">Bạc</span></div>
+       </div>
+       <table class="tbl">
+        <thead><tr><th>Khách hàng</th><th>Liên hệ</th><th class="r">Tổng chi tiêu</th><th class="r">Điểm</th><th>Hạng</th><th></th></tr></thead>
+        <tbody id="crows"></tbody>
+       </table>
+      </div>
+      <div class="card detail" style="overflow:hidden">
+       <div class="profile">
+        <div class="avatar" style="background:linear-gradient(135deg,#34D399,#0EA5E9)">MK</div>
+        <b style="font-size:16px">Trần Minh Khoa</b>
+        <div style="color:var(--muted);font-size:12px;margin-top:2px">Khách hàng từ 03/2026</div>
+        <span class="tier">★ Thành viên Vàng</span>
+       </div>
+       <div class="pstats"><div><b class="num">5</b><small>Đơn hàng</small></div><div><b class="num">168,4tr</b><small>Chi tiêu</small></div><div><b class="num">1.684</b><small>Điểm</small></div></div>
+       <div class="kv">
+        <div><svg class="ic sm"><use href="#i-phone"/></svg>0938 112 456</div>
+        <div><svg class="ic sm"><use href="#i-mail"/></svg>khoa.tran@gmail.com</div>
+        <div><svg class="ic sm"><use href="#i-pin"/></svg>227 Nguyễn Văn Cừ, Q.5, TP.HCM</div>
+       </div>
+       <div class="card-h" style="border-top:1px solid var(--line);padding-top:14px"><h3>Lịch sử mua hàng</h3><div class="r"><span class="link">Xem tất cả</span></div></div>
+       <div class="items" style="padding-top:0">
+        <div class="item"><div class="nm"><b style="font-family:Consolas,monospace">ORD-2610-0021</b><small>30/10/2026 · 2 sản phẩm</small></div><span class="pill p-violet">Đang xử lý</span></div>
+        <div class="item"><div class="nm"><b style="font-family:Consolas,monospace">ORD-2609-0014</b><small>12/09/2026 · 1 sản phẩm</small></div><span class="pill p-ok">Hoàn thành</span></div>
+        <div class="item" style="border:0"><div class="nm"><b style="font-family:Consolas,monospace">ORD-2607-0006</b><small>21/07/2026 · 3 sản phẩm</small></div><span class="pill p-ok">Hoàn thành</span></div>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- ===================== AI ===================== -->
+    <section data-screen="ai" style="height:100%">
+     <div class="ai">
+      <div class="card chat">
+       <div class="card-h" style="padding-bottom:14px;border-bottom:1px solid var(--line)"><div class="bot-av" style="width:30px;height:30px"><svg class="ic sm"><use href="#i-spark"/></svg></div><div><h3>Trợ lý AI nghiệp vụ</h3><div class="sub">Truy vấn dữ liệu thật · tuân thủ quyền Admin</div></div><div class="r"><button class="btn sm"><svg class="ic sm"><use href="#i-plus"/></svg>Hội thoại mới</button></div></div>
+       <div class="msgs">
+        <div class="msg me"><div class="bubble">Báo cáo doanh thu tháng 10 và 3 sản phẩm bán chạy nhất?</div></div>
+        <div class="msg bot"><div class="bot-av"><svg class="ic sm"><use href="#i-spark"/></svg></div>
+         <div class="bubble"><span class="tool"><svg class="ic sm" style="width:12px"><use href="#i-db"/></svg>get_sales_report(month: 10)</span><br>
+          Doanh thu tháng 10/2026 đạt <b>286,4 triệu đ</b> từ 9 đơn hoàn tất, tăng <b style="color:var(--ok)">8,1%</b> so với tháng 9. Ba sản phẩm dẫn đầu:
+          <table class="mini">
+           <tr><td>1. ASUS ROG Zephyrus G16 (2026)</td><td>105,98 tr</td></tr>
+           <tr><td>2. Apple MacBook Pro 14 M3 Pro</td><td>49,99 tr</td></tr>
+           <tr><td>3. Lenovo Legion Pro 5 16IRX9</td><td>38,49 tr</td></tr>
+          </table>
+         </div></div>
+        <div class="msg me"><div class="bubble">Tư vấn laptop lập trình tầm 30 triệu</div></div>
+        <div class="msg bot"><div class="bot-av"><svg class="ic sm"><use href="#i-spark"/></svg></div>
+         <div class="bubble"><span class="tool"><svg class="ic sm" style="width:12px"><use href="#i-search"/></svg>search_products_by_requirement(budget: 30tr)</span><br>
+          Gợi ý phù hợp nhất là <b>ASUS Zenbook 14 OLED</b> (28,99 tr) — Core Ultra 5, 16GB RAM, nhẹ 1,2kg; còn 11 chiếc trong kho. Nếu cần GPU rời, cân nhắc <b>MSI Katana 15</b> (25,99 tr, RTX 4060) nhưng chỉ còn 4 chiếc.</div></div>
+       </div>
+       <div class="composer"><span class="ph-t">Hỏi về doanh thu, tồn kho, tư vấn sản phẩm…</span><button class="btn primary sm" style="height:34px;width:34px;padding:0;justify-content:center"><svg class="ic sm"><use href="#i-send"/></svg></button></div>
+      </div>
+      <div class="card">
+       <div class="card-h" style="padding-bottom:10px"><h3>Gợi ý câu hỏi</h3></div>
+       <div class="sugg">
+        <div><svg class="ic sm"><use href="#i-chart"/></svg><span><b>Báo cáo doanh thu tháng</b><small>Tổng hợp doanh thu, top sản phẩm</small></span></div>
+        <div><svg class="ic sm"><use href="#i-alert"/></svg><span><b>Sản phẩm sắp hết hàng</b><small>Danh sách cần nhập bổ sung</small></span></div>
+        <div><svg class="ic sm"><use href="#i-laptop"/></svg><span><b>Tư vấn laptop 25 triệu</b><small>Văn phòng, học tập</small></span></div>
+        <div><svg class="ic sm"><use href="#i-gpu"/></svg><span><b>Laptop gaming 35 triệu</b><small>RTX 4060 trở lên</small></span></div>
+       </div>
+       <div class="perm"><b>Quyền truy cập của AI</b>
+        <div>Doanh thu toàn hệ thống<span class="pill p-ok" style="font-size:11px;padding:0 8px 0 7px">Cho phép</span></div>
+        <div>Tồn kho &amp; sản phẩm<span class="pill p-ok" style="font-size:11px;padding:0 8px 0 7px">Cho phép</span></div>
+        <div>Dữ liệu khách hàng<span class="pill p-ok" style="font-size:11px;padding:0 8px 0 7px">Cho phép</span></div>
+        <div style="margin-top:6px;color:var(--faint);font-size:11.5px">Vai trò Sales sẽ bị chặn câu hỏi về doanh thu.</div>
+       </div>
+      </div>
+     </div>
+    </section>
+
+   </div>
+   <div class="statusbar">
+    <span><span class="dot" style="width:6px;height:6px"></span>&nbsp; Đã kết nối · Direct Database</span>
+    <span>Đồng bộ lúc 09:41</span>
+    <div class="r"><span>admin · Admin</span><span>v2.0 · UDQL2 2026</span></div>
+   </div>
+  </div>
+ </div>
+ </section>
+</div>
+
+<div class="mnav" id="mnav"><span class="lbl">MOCKUP</span></div>
+
+<script>
+const P=[
+ ["LAP-ROG-G16-01","ASUS ROG Zephyrus G16 (2026)","ASUS",52990000,12,"#EFF6FF","#2563EB","AS"],
+ ["LAP-LEG-P5-02","Lenovo Legion Pro 5 16IRX9","Lenovo",38490000,15,"#E6F4FC","#0284C7","LN"],
+ ["LAP-HEL-N16-03","Acer Predator Helios Neo 16","Acer",32990000,8,"#E7F8F1","#059669","AC"],
+ ["LAP-MSI-K15-04","MSI Katana 15 B13VFK","MSI",25990000,4,"#FDECEC","#DC2626","MS"],
+ ["LAP-ALIEN-M16-05","Dell Alienware m16 R2","Dell",64990000,5,"#F1EBFE","#7C3AED","AW"],
+ ["LAP-MAC-MBP14-06","Apple MacBook Pro 14 M3 Pro","Apple",49990000,14,"#F1F5F9","#334155","AP"],
+ ["LAP-MAC-AIR13-07","Apple MacBook Air 13 M3 (8GB/256GB)","Apple",27490000,20,"#F1F5F9","#334155","AP"],
+ ["LAP-DELL-XPS15-08","Dell XPS 15 9530 OLED","Dell",58990000,6,"#E6F4FC","#0284C7","DL"],
+ ["LAP-TP-X1C-09","Lenovo ThinkPad X1 Carbon Gen 12","Lenovo",46990000,7,"#FEF4E2","#D97706","TP"],
+];
+const fmt=n=>n.toLocaleString('vi-VN')+' đ';
+document.getElementById('prows').innerHTML=P.map((p,i)=>{
+ const s=p[4], max=20, low=s<=5, w=Math.min(100,s/max*100);
+ const col=s<=3?'#EF4444':low?'#F59E0B':'#10B981';
+ const st=s<=3?'<span class="pill p-bad">Sắp hết</span>':low?'<span class="pill p-warn">Tồn thấp</span>':'<span class="pill p-ok">Đang bán</span>';
+ return `<tr class="${i==7?'sel':''}"><td><div class="prod"><div class="thumb" style="background:${p[5]};color:${p[6]}">${p[7]}</div><div><b>${p[1]}</b><small>${p[0]}</small></div></div></td>
+ <td>${p[2]}</td><td class="r num" style="font-weight:600">${fmt(p[3])}</td>
+ <td><div class="stock"><div class="bar"><i style="width:${w}%;background:${col}"></i></div><span class="num" style="font-weight:600;color:${low?col:'inherit'}">${s}</span></div></td>
+ <td>${st}</td><td><div class="row-act"><span><svg class="ic sm"><use href="#i-edit"/></svg></span><span><svg class="ic sm"><use href="#i-trash"/></svg></span></div></td></tr>`}).join('');
+
+const O=[
+ ["ORD-2610-0022","Nguyễn Thị Hương","0901 223 344","31/10 · 09:12",27490000,"Tiền mặt","p-warn","Chờ xác nhận","#F472B6,#FB923C"],
+ ["ORD-2610-0021","Trần Minh Khoa","0938 112 456","30/10 · 14:22",55000000,"Chuyển khoản","p-violet","Đang xử lý","#34D399,#0EA5E9"],
+ ["ORD-2610-0020","Lê Quốc Bảo","0912 778 990","29/10 · 18:40",38490000,"Thẻ","p-info","Đang giao","#60A5FA,#3B82F6"],
+ ["ORD-2610-0019","Phạm Gia Hân","0987 654 321","28/10 · 10:05",5290000,"Tiền mặt","p-ok","Hoàn thành","#A78BFA,#EC4899"],
+ ["ORD-2610-0018","Võ Thành Đạt","0909 345 678","27/10 · 16:30",64990000,"Chuyển khoản","p-ok","Hoàn thành","#FBBF24,#F97316"],
+ ["ORD-2610-0017","Đỗ Mai Anh","0933 456 789","26/10 · 11:15",2290000,"Tiền mặt","p-bad","Đã hủy","#F87171,#F472B6"],
+ ["ORD-2610-0016","Hoàng Anh Tuấn","0977 112 233","25/10 · 15:48",46990000,"Chuyển khoản","p-ok","Hoàn thành","#2DD4BF,#3B82F6"],
+ ["ORD-2610-0015","Bùi Ngọc Lan","0966 223 344","24/10 · 09:30",28990000,"Thẻ","p-violet","Đang xử lý","#C084FC,#3B82F6"],
+ ["ORD-2610-0014","Ngô Đức Huy","0944 556 677","23/10 · 13:02",52990000,"Chuyển khoản","p-ok","Hoàn thành","#4ADE80,#14B8A6"],
+];
+const ini=n=>n.split(' ').slice(-2).map(x=>x[0]).join('');
+document.getElementById('orows').innerHTML=O.map((o,i)=>`<tr class="${i==1?'sel':''}">
+ <td style="font-family:Consolas,monospace;font-weight:600">${o[0]}</td>
+ <td><div class="cust"><div class="avatar" style="background:linear-gradient(135deg,${o[8]})">${ini(o[1])}</div><div><b style="font-weight:600">${o[1]}</b><small>${o[2]}</small></div></div></td>
+ <td style="color:var(--muted)">${o[3]}</td><td class="r num" style="font-weight:600">${fmt(o[4])}</td>
+ <td style="color:var(--text-2)">${o[5]}</td><td><span class="pill ${o[6]}">${o[7]}</span></td></tr>`).join('');
+
+const C=[["Trần Minh Khoa","0938 112 456",168400000,1684,"Vàng","#34D399,#0EA5E9"],["Võ Thành Đạt","0909 345 678",214980000,2150,"Kim cương","#FBBF24,#F97316"],
+ ["Hoàng Anh Tuấn","0977 112 233",132970000,1330,"Vàng","#2DD4BF,#3B82F6"],["Ngô Đức Huy","0944 556 677",98500000,985,"Bạc","#4ADE80,#14B8A6"],
+ ["Lê Quốc Bảo","0912 778 990",76980000,770,"Bạc","#60A5FA,#3B82F6"],["Bùi Ngọc Lan","0966 223 344",57980000,580,"Bạc","#C084FC,#3B82F6"],
+ ["Nguyễn Thị Hương","0901 223 344",27490000,275,"Thành viên","#F472B6,#FB923C"],["Phạm Gia Hân","0987 654 321",15870000,159,"Thành viên","#A78BFA,#EC4899"]];
+const tierCls={"Kim cương":"p-info","Vàng":"p-warn","Bạc":"p-mute","Thành viên":"p-mute"};
+document.getElementById('crows').innerHTML=C.map((c,i)=>`<tr class="${i==0?'sel':''}">
+ <td><div class="cust"><div class="avatar" style="background:linear-gradient(135deg,${c[5]})">${ini(c[0])}</div><b style="font-weight:600">${c[0]}</b></div></td>
+ <td class="num" style="color:var(--text-2)">${c[1]}</td><td class="r num" style="font-weight:600">${fmt(c[2])}</td>
+ <td class="r num">${c[3].toLocaleString('vi-VN')}</td><td><span class="pill ${tierCls[c[4]]}">${c[4]}</span></td>
+ <td><div class="row-act"><span><svg class="ic sm"><use href="#i-edit"/></svg></span><span><svg class="ic sm"><use href="#i-more"/></svg></span></div></td></tr>`).join('');
+
+document.getElementById('pgrid').innerHTML=P.slice(0,9).map((p,i)=>`<div class="pcard ${i==0?'in':''}">
+ <div class="pimg" style="background:${p[5]};color:${p[6]}"><svg class="ic" style="width:40px;height:40px;stroke-width:1.3"><use href="#i-laptop"/></svg></div>
+ <span class="add"><svg class="ic sm"><use href="#i-${i==0?'check':'plus'}"/></svg></span>
+ <b>${p[1]}</b><div class="pr"><span class="num">${fmt(p[3])}</span><small style="${p[4]<=5?'color:var(--bad);font-weight:600':''}">Còn ${p[4]}</small></div></div>`).join('');
+
+// Revenue chart
+(function(){
+ const rev=[148,162,155,178,190,205,198,226,241,265,286,0], gp=rev.map(v=>Math.round(v*.16));
+ const m=['T11','T12','T1','T2','T3','T4','T5','T6','T7','T8','T9','T10'];
+ const data=[132,148,162,155,178,190,205,198,226,241,265,286];
+ const W=760,H=250,L=40,B=26,T=10,max=320,cw=(W-L)/12;
+ let s='';
+ for(let g=0;g<=4;g++){const y=T+(H-B-T)*(1-g/4);s+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="#EEF1F5"/><text x="${L-8}" y="${y+4}" font-size="11" fill="#94A3B8" text-anchor="end">${g*80}</text>`;}
+ data.forEach((v,i)=>{const x=L+i*cw+cw*.22,bw=cw*.56,h=(H-B-T)*v/max,y=H-B-h,gh=(H-B-T)*(v*.16)/max;
+  const last=i==11;
+  s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="6" fill="${last?'url(#gl)':'#DBEAFE'}"/>`;
+  s+=`<rect x="${x}" y="${H-B-gh}" width="${bw}" height="${gh}" rx="0" fill="${last?'#1E40AF':'#BFDBFE'}" opacity=".9"/>`;
+  s+=`<text x="${x+bw/2}" y="${H-8}" font-size="11" fill="${last?'#0F172A':'#94A3B8'}" font-weight="${last?600:400}" text-anchor="middle">${m[i]}</text>`;
+  if(last){s+=`<g><rect x="${x-24}" y="${y-34}" width="${bw+48}" height="24" rx="7" fill="#0F172A"/><text x="${x+bw/2}" y="${y-18}" font-size="11.5" fill="#fff" font-weight="600" text-anchor="middle">286,4 tr</text></g>`}
+ });
+ document.getElementById('rev').innerHTML=`<defs><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs>`+s;
+})();
+
+// Router
+const screens={login:"Đăng nhập",dashboard:"Bảng điều khiển",products:"Sản phẩm",orders:"Đơn hàng",pos:"Bán hàng (POS)",customers:"Khách hàng",ai:"Trợ lý AI"};
+const mnav=document.getElementById('mnav');
+Object.entries(screens).forEach(([k,v])=>{const a=document.createElement('a');a.textContent=v;a.dataset.go=k;mnav.appendChild(a)});
+function go(k){
+ if(!screens[k])k='dashboard';
+ const isLogin=k==='login';
+ document.querySelector('[data-screen="login"]').classList.toggle('show',isLogin);
+ document.getElementById('shell').classList.toggle('show',!isLogin);
+ document.querySelectorAll('.content > section').forEach(s=>s.classList.toggle('show',s.dataset.screen===k));
+ document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.go===k&&!a.textContent.includes('Danh mục')));
+ mnav.querySelectorAll('a').forEach(a=>a.classList.toggle('on',a.dataset.go===k));
+ document.getElementById('crumb').innerHTML=`TechGear <svg class="ic sm"><use href="#i-right"/></svg><b>${screens[k]}</b>`;
+ const c=document.querySelector('.content');c.style.overflow=(k==='pos'||k==='ai')?'hidden':'auto';
+ if(location.hash.slice(1)!==k)history.replaceState(null,'','#'+k);
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t)go(t.dataset.go)});
+go(location.hash.slice(1)||'dashboard');
+</script>
+</body>
+</html>

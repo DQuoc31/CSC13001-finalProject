@@ -14,11 +14,12 @@ public partial class CategoryEditWindow : Window
     public CategoryEditWindow(CategoryDto? existingCategory = null)
     {
         InitializeComponent();
+        SourceInitialized += (_, _) => WindowCaption.Apply(this);
         _existingCategory = existingCategory;
 
         if (existingCategory != null)
         {
-            TxtTitle.Text = $"✏️ Chỉnh Sửa Danh Mục: {existingCategory.Name}";
+            TxtTitle.Text = $"Chỉnh Sửa Danh Mục: {existingCategory.Name}";
             Title = $"Chỉnh sửa - {existingCategory.Name}";
 
             TxtName.Text = existingCategory.Name;

@@ -14,11 +14,12 @@ public partial class CustomerEditWindow : Window
     public CustomerEditWindow(CustomerDto? existingCustomer = null)
     {
         InitializeComponent();
+        SourceInitialized += (_, _) => WindowCaption.Apply(this);
         _existingCustomer = existingCustomer;
 
         if (existingCustomer != null)
         {
-            TxtTitle.Text = $"✏️ Chỉnh Sửa Khách Hàng: {existingCustomer.FullName}";
+            TxtTitle.Text = $"Chỉnh Sửa Khách Hàng: {existingCustomer.FullName}";
             Title = $"Chỉnh sửa - {existingCustomer.CustomerCode}";
 
             TxtFullName.Text = existingCustomer.FullName;

@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Thông Tin Sản Phẩm" Height="680" Width="680"
-        WindowStartupLocation="CenterOwner" Background="#F8FAFC" ResizeMode="NoResize">
+        Title="Thông Tin Sản Phẩm" Height="760" Width="680"
+        WindowStartupLocation="CenterOwner" Background="White" ResizeMode="NoResize"
+        FontFamily="{StaticResource Font.Text}" FontSize="13" Foreground="{StaticResource Brush.Text}"
+        TextOptions.TextFormattingMode="Display">
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,7 +18,7 @@
         <!-- Header -->
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="0,0,0,12" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
             <StackPanel>
-                <TextBlock x:Name="TxtTitle" Text="➕ Thêm Sản Phẩm Mới" FontSize="18" FontWeight="Bold" Foreground="#1E293B"/>
+                <TextBlock x:Name="TxtTitle" Text="Thêm Sản Phẩm Mới" FontSize="18" FontWeight="Bold" Foreground="#1E293B"/>
                 <TextBlock Text="Nhập đầy đủ thông tin kỹ thuật laptop/linh kiện phần cứng bên dưới" FontSize="12" Foreground="#64748B" Margin="0,4,0,0"/>
             </StackPanel>
         </Border>
@@ -25,8 +27,8 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
             <StackPanel>
                 <!-- Dòng 1: Tên sản phẩm -->
-                <TextBlock Text="Tên sản phẩm (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                <TextBox x:Name="TxtName" Padding="8,6" Margin="0,0,0,12" FontSize="13"/>
+                <TextBlock Text="Tên sản phẩm (*):" Style="{StaticResource Text.Label}"/>
+                <TextBox x:Name="TxtName" Margin="0,0,0,12"/>
 
                 <!-- Dòng 2: Mã SKU & Hãng sản xuất -->
                 <Grid Margin="0,0,0,12">
@@ -37,13 +39,13 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Mã SKU (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtSku" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Mã SKU (*):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtSku"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Hãng sản xuất (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtBrand" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Hãng sản xuất (*):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtBrand"/>
                     </StackPanel>
                 </Grid>
 
@@ -56,13 +58,13 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Danh mục (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <ComboBox x:Name="CboCategory" DisplayMemberPath="Name" SelectedValuePath="Id" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Danh mục (*):" Style="{StaticResource Text.Label}"/>
+                        <ComboBox x:Name="CboCategory" DisplayMemberPath="Name" SelectedValuePath="Id"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Model:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtModel" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Model:" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtModel"/>
                     </StackPanel>
                 </Grid>
 
@@ -75,13 +77,13 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Giá bán niêm yết (VNĐ) (*):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtPrice" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Giá bán niêm yết (VNĐ) (*):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtPrice"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Giá vốn nhập kho (VNĐ):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtCostPrice" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Giá vốn nhập kho (VNĐ):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtCostPrice"/>
                     </StackPanel>
                 </Grid>
 
@@ -96,18 +98,18 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Số lượng tồn:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtStock" Text="10" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Số lượng tồn:" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtStock" Text="10"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Cảnh báo tồn tối thiểu:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtMinStock" Text="3" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Cảnh báo tồn tối thiểu:" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtMinStock" Text="3"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4">
-                        <TextBlock Text="Bảo hành (tháng):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtWarranty" Text="24" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Bảo hành (tháng):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtWarranty" Text="24"/>
                     </StackPanel>
                 </Grid>
 
@@ -123,13 +125,13 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Vi xử lý (CPU):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtCpu" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Vi xử lý (CPU):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtCpu"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Bộ nhớ RAM:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtRam" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Bộ nhớ RAM:" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtRam"/>
                     </StackPanel>
                 </Grid>
 
@@ -142,13 +144,13 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Ổ cứng lưu trữ (SSD):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtStorage" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Ổ cứng lưu trữ (SSD):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtStorage"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Card đồ họa (GPU):" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtGpu" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Card đồ họa (GPU):" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtGpu"/>
                     </StackPanel>
                 </Grid>
 
@@ -161,29 +163,27 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Kích thước màn hình:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtScreen" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Kích thước màn hình:" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtScreen"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Hệ điều hành:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                        <TextBox x:Name="TxtOs" Padding="8,6" FontSize="13"/>
+                        <TextBlock Text="Hệ điều hành:" Style="{StaticResource Text.Label}"/>
+                        <TextBox x:Name="TxtOs"/>
                     </StackPanel>
                 </Grid>
 
                 <!-- Mô tả thêm -->
-                <TextBlock Text="Mô tả tóm tắt:" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,4"/>
-                <TextBox x:Name="TxtDescription" Height="55" TextWrapping="Wrap" AcceptsReturn="True" Padding="8,6" FontSize="12" Margin="0,0,0,8"/>
+                <TextBlock Text="Mô tả tóm tắt:" Style="{StaticResource Text.Label}"/>
+                <TextBox x:Name="TxtDescription" Height="55" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,8"/>
             </StackPanel>
         </ScrollViewer>
 
         <!-- Footer Buttons -->
         <Border Grid.Row="2" Margin="0,16,0,0" Padding="0,12,0,0" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Hủy bỏ" Padding="16,8" Margin="0,0,8,0" Background="#E2E8F0" Foreground="#334155"
-                        BorderThickness="0" FontWeight="SemiBold" Click="CancelButton_Click"/>
-                <Button Content="💾 Lưu Sản Phẩm" Padding="20,8" Background="#2563EB" Foreground="White"
-                        BorderThickness="0" FontWeight="Bold" Click="SaveButton_Click"/>
+                <Button Content="Hủy bỏ" Margin="0,0,8,0" MinWidth="96" Click="CancelButton_Click"/>
+                <Button Style="{StaticResource Btn.Primary}" Content="Lưu Sản Phẩm" MinWidth="140" Click="SaveButton_Click"/>
             </StackPanel>
         </Border>
     </Grid>

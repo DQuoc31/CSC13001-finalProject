@@ -3,109 +3,308 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
-    <Grid Margin="20">
+             xmlns:ctl="clr-namespace:LaptopStore.Client.Controls"
+             mc:Ignorable="d" d:DesignHeight="760" d:DesignWidth="1150">
+    <UserControl.Resources>
+        <Style x:Key="Spec" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Brush.Surface2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Brush.Line2}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="10,9"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+        <Style x:Key="SpecLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Faint}"/>
+        </Style>
+        <Style x:Key="SpecValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+        <Style x:Key="SpecIcon" TargetType="ctl:Icon">
+            <Setter Property="Width" Value="15"/>
+            <Setter Property="Height" Value="15"/>
+            <Setter Property="Margin" Value="0,1,9,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Tiêu đề & Thao tác nhanh -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="💻 Quản Lý Sản Phẩm (Laptop &amp; Phần Cứng)" FontSize="24" FontWeight="Bold" Foreground="#1E293B"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="➕ Thêm Sản Phẩm" Padding="14,6" Margin="4,0" Background="#10B981" Foreground="White" BorderThickness="0" FontWeight="Bold"
-                        Command="{Binding AddProductCommand}"/>
-                <Button Content="✏️ Sửa Sản Phẩm" Padding="14,6" Margin="4,0" Background="#3B82F6" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                        Command="{Binding EditProductCommand}"/>
-                <Button Content="🗑️ Xóa đã chọn" Padding="12,6" Margin="4,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontWeight="SemiBold"
-                        Command="{Binding DeleteProductCommand}"/>
-                <Button Content="🔄 Tải lại" Padding="12,6" Margin="4,0" Background="#F1F5F9" BorderThickness="1" BorderBrush="#CBD5E1"
-                        Command="{Binding LoadCommand}"/>
+        <!-- Tiêu đề -->
+        <DockPanel Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Sản phẩm" Style="{StaticResource Text.H1}"/>
+                <TextBlock Style="{StaticResource Text.Sub}">
+                    <Run Text="{Binding Products.Count, Mode=OneWay}"/><Run Text=" sản phẩm đang hiển thị · Giá trị tồn kho (giá vốn) "/><Run Text="{Binding InventoryValue, Mode=OneWay, Converter={StaticResource ShortMoney}}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text}"/>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Button Content="Tải lại" ctl:Ui.Icon="{StaticResource Icon.Refresh}" Command="{Binding LoadCommand}" Margin="0,0,8,0"/>
+                <Button Style="{StaticResource Btn.Primary}" Content="Thêm sản phẩm" ctl:Ui.Icon="{StaticResource Icon.Plus}" Command="{Binding AddProductCommand}"/>
             </StackPanel>
         </DockPanel>
 
-        <!-- Thanh tìm kiếm & lọc danh mục -->
-        <Border Grid.Row="1" Background="#F8FAFC" Padding="12" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,16">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="220"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Ô tìm kiếm -->
-                <TextBox Grid.Column="0" Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" 
-                         Padding="10,6" Margin="0,0,12,0" VerticalContentAlignment="Center"
-                         ToolTip="Tìm theo Tên laptop, SKU, Brand, CPU, GPU..."/>
-
-                <!-- Combo lọc danh mục -->
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
-                          DisplayMemberPath="Name" VerticalContentAlignment="Center" Padding="8,4"/>
-            </Grid>
-        </Border>
-
-        <!-- Bảng danh sách sản phẩm và Panel xem chi tiết -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="1.5*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="370"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Bảng danh sách DataGrid -->
-            <DataGrid Grid.Column="0" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
-                      AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column" Background="White" RowHeight="38" Margin="0,0,12,0">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mã SKU" Binding="{Binding Sku}" Width="130"/>
-                    <DataGridTextColumn Header="Tên Sản Phẩm" Binding="{Binding Name}" Width="*"/>
-                    <DataGridTextColumn Header="Hãng" Binding="{Binding Brand}" Width="90"/>
-                    <DataGridTextColumn Header="Giá Bán" Binding="{Binding Price, StringFormat={}{0:N0} đ}" Width="130"/>
-                    <DataGridTextColumn Header="Tồn Kho" Binding="{Binding StockQuantity}" Width="80"/>
-                    <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <!-- Danh sách -->
+            <Border Style="{StaticResource Card}" ClipToBounds="True">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Padding="16,14,16,8" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,0,0,1">
+                        <StackPanel>
+                            <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged, Delay=250}" MaxWidth="420" HorizontalAlignment="Left"
+                                     Width="380" Margin="0,0,0,12"
+                                     ctl:Ui.Icon="{StaticResource Icon.Search}" ctl:Ui.Placeholder="Tìm theo tên, SKU, hãng, CPU, GPU…"/>
+                            <WrapPanel>
+                                <ListBox Style="{StaticResource ChipList}" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}"/>
+                                                <TextBlock Text="{Binding ProductCount}" Margin="6,0,0,0" Opacity="0.55" FontSize="11.5" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <ToggleButton Style="{StaticResource ChipToggle}" IsChecked="{Binding ShowLowStockOnly}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Sắp hết hàng"/>
+                                        <TextBlock Text="{Binding LowStockTotal}" Margin="6,0,0,0" Opacity="0.7" FontSize="11.5" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ToggleButton>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
 
-            <!-- Chi tiết cấu hình sản phẩm được chọn -->
-            <Border Grid.Column="1" Background="#F8FAFC" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="📋 Thông Số Kỹ Thuật" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,12"/>
+                    <Grid>
+                        <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" RowHeight="58">
+                            <DataGrid.InputBindings>
+                                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditProductCommand}"/>
+                            </DataGrid.InputBindings>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Sản phẩm" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <ContentControl Width="38" Height="38" Content="{Binding Brand}" ContentTemplate="{StaticResource ThumbTemplate}" Margin="0,0,11,0"/>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Sku}" Style="{StaticResource Text.Mono}" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Hãng" Binding="{Binding Brand}" Width="90"/>
+                                <DataGridTextColumn Header="Giá bán" Binding="{Binding Price, StringFormat={}{0:N0} đ}" Width="130"
+                                                    ElementStyle="{StaticResource Cell.Right}" HeaderStyle="{StaticResource Header.Right}"/>
+                                <DataGridTemplateColumn Header="Tồn kho" Width="118">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Grid Width="56" Height="6" VerticalAlignment="Center">
+                                                    <Border Background="#EEF1F5" CornerRadius="3"/>
+                                                    <Border HorizontalAlignment="Left" CornerRadius="3"
+                                                            Width="{Binding Converter={StaticResource StockBar}, ConverterParameter=width}"
+                                                            Background="{Binding Converter={StaticResource StockBar}, ConverterParameter=brush}"/>
+                                                </Grid>
+                                                <TextBlock Text="{Binding StockQuantity}" FontWeight="SemiBold" Margin="9,0,0,0" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Trạng thái" Width="118">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ContentControl Content="{Binding}" ContentTemplate="{StaticResource PillTemplate}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
-                        <TextBlock Text="Tên sản phẩm:" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Name}" TextWrapping="Wrap" Margin="0,2,0,8" FontSize="13" FontWeight="Bold"/>
+                        <StackPanel Style="{StaticResource EmptyState}"
+                                    Visibility="{Binding Products.Count, Converter={StaticResource Vis}, ConverterParameter=invert}">
+                            <ctl:Icon Data="{StaticResource Icon.Search}" Width="30" Height="30" Foreground="{StaticResource Brush.Faint}"/>
+                            <TextBlock Text="Không tìm thấy sản phẩm phù hợp" FontWeight="SemiBold" Margin="0,10,0,2" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Thử từ khoá khác hoặc bỏ bớt bộ lọc." Style="{StaticResource Text.Muted}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </DockPanel>
+            </Border>
 
-                        <TextBlock Text="Mã SKU:" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Sku}" Margin="0,2,0,8" FontSize="13"/>
-
-                        <TextBlock Text="Giá bán niêm yết:" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Price, StringFormat={}{0:N0} VNĐ}" Margin="0,2,0,8" FontSize="15" FontWeight="Bold" Foreground="#2563EB"/>
-
-                        <TextBlock Text="Số lượng tồn kho:" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.StockQuantity, StringFormat={}{0} chiếc}" Margin="0,2,0,8" FontSize="13"/>
-
-                        <Separator Margin="0,4,0,8"/>
-
-                        <TextBlock Text="Vi xử lý (CPU):" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Cpu, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
-
-                        <TextBlock Text="Bộ nhớ (RAM):" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Ram, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
-
-                        <TextBlock Text="Ổ cứng (SSD):" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Storage, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
-
-                        <TextBlock Text="Card đồ họa (GPU):" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.Gpu, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
-
-                        <TextBlock Text="Màn hình:" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.ScreenSize, TargetNullValue='Không áp dụng'}" Margin="0,2,0,8" TextWrapping="Wrap"/>
-
-                        <TextBlock Text="Bảo hành:" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <TextBlock Text="{Binding SelectedProduct.WarrantyMonths, StringFormat={}{0} tháng}" Margin="0,2,0,8"/>
+            <!-- Chi tiết sản phẩm -->
+            <Border Grid.Column="2" Style="{StaticResource Card}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel Style="{StaticResource EmptyState}"
+                                Visibility="{Binding SelectedProduct, Converter={StaticResource Vis}, ConverterParameter=invert}">
+                        <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource Brush.AccentSoft}" HorizontalAlignment="Center">
+                            <ctl:Icon Data="{StaticResource Icon.Laptop}" Width="26" Height="26" Foreground="{StaticResource Brush.Accent}"/>
+                        </Border>
+                        <TextBlock Text="Chọn một sản phẩm" FontWeight="SemiBold" FontSize="14" Margin="0,14,0,4" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Thông số kỹ thuật, giá và tồn kho sẽ hiển thị tại đây." Style="{StaticResource Text.Muted}"
+                                   TextWrapping="Wrap" TextAlignment="Center" MaxWidth="230"/>
                     </StackPanel>
-                </ScrollViewer>
+
+                    <DockPanel Visibility="{Binding SelectedProduct, Converter={StaticResource Vis}}">
+                        <!-- Thao tác -->
+                        <Border DockPanel.Dock="Bottom" Padding="18,14" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Style="{StaticResource Btn.Primary}" Content="Chỉnh sửa" ctl:Ui.Icon="{StaticResource Icon.Edit}"
+                                        Command="{Binding EditProductCommand}"/>
+                                <Button Grid.Column="2" Style="{StaticResource Btn.Danger}" Content="Xóa" ctl:Ui.Icon="{StaticResource Icon.Trash}"
+                                        Command="{Binding DeleteProductCommand}"/>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <StackPanel Margin="18,18,18,14">
+                                    <Border Height="120" CornerRadius="12" Margin="0,0,0,14" ClipToBounds="True">
+                                        <Border.Background>
+                                            <RadialGradientBrush Center="0.2,0" GradientOrigin="0.2,0" RadiusX="1.2" RadiusY="1.4">
+                                                <GradientStop Color="#1E3A8A" Offset="0"/>
+                                                <GradientStop Color="#172554" Offset="0.45"/>
+                                                <GradientStop Color="#0B1120" Offset="1"/>
+                                            </RadialGradientBrush>
+                                        </Border.Background>
+                                        <ctl:Icon Data="{StaticResource Icon.Laptop}" Width="60" Height="60" StrokeThickness="1.2" Foreground="#BFDBFE"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding SelectedProduct.Name}" FontSize="16.5" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <WrapPanel Margin="0,8,0,0">
+                                        <Border Style="{StaticResource Tag}">
+                                            <TextBlock Text="{Binding SelectedProduct.Sku}" FontFamily="{StaticResource Font.Mono}" FontSize="11.5" Foreground="{StaticResource Brush.Text2}"/>
+                                        </Border>
+                                        <Border Style="{StaticResource Tag}">
+                                            <TextBlock Text="{Binding SelectedProduct.Brand}" FontSize="11.5" Foreground="{StaticResource Brush.Text2}"/>
+                                        </Border>
+                                        <ContentControl Content="{Binding SelectedProduct}" ContentTemplate="{StaticResource PillTemplate}"/>
+                                    </WrapPanel>
+                                    <TextBlock Text="{Binding SelectedProduct.Price, StringFormat={}{0:N0} đ}" FontFamily="{StaticResource Font.Display}"
+                                               FontSize="24" FontWeight="Bold" Foreground="{StaticResource Brush.AccentInk}" Margin="0,14,0,0"/>
+                                    <TextBlock Style="{StaticResource Text.Muted}" Margin="0,2,0,0">
+                                        <Run Text="Giá vốn "/><Run Text="{Binding SelectedProduct.CostPrice, Mode=OneWay, StringFormat={}{0:N0} đ}"/><Run Text=" · Biên lãi "/><Run Text="{Binding SelectedProduct, Mode=OneWay, Converter={StaticResource Margin}}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Ok}"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <Border Style="{StaticResource Divider}"/>
+
+                                <Grid Margin="14,12,14,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Border Grid.ColumnSpan="2" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Cpu}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="CPU" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.Cpu, TargetNullValue='Không áp dụng'}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                    <Border Grid.Row="1" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Ram}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="RAM" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.Ram, TargetNullValue='—'}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Disk}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="Ổ CỨNG" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.Storage, TargetNullValue='—'}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                    <Border Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Gpu}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="GPU" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.Gpu, TargetNullValue='Không áp dụng'}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                    <Border Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Screen}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="MÀN HÌNH" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.ScreenSize, TargetNullValue='Không áp dụng'}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                    <Border Grid.Row="4" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Shield}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="BẢO HÀNH" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.WarrantyMonths, StringFormat={}{0} tháng}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                    <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource Spec}">
+                                        <DockPanel>
+                                            <ctl:Icon Style="{StaticResource SpecIcon}" Data="{StaticResource Icon.Tag}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="DANH MỤC" Style="{StaticResource SpecLabel}"/>
+                                                <TextBlock Text="{Binding SelectedProduct.CategoryName, TargetNullValue='—'}" Style="{StaticResource SpecValue}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Tồn kho -->
+                                <Border Margin="18,0,18,16" CornerRadius="12" Padding="12,11" BorderThickness="1"
+                                        Background="{Binding SelectedProduct, Converter={StaticResource ToneBrush}, ConverterParameter=bg}"
+                                        BorderBrush="{Binding SelectedProduct, Converter={StaticResource ToneBrush}, ConverterParameter=bg}">
+                                    <DockPanel>
+                                        <ctl:Icon Data="{StaticResource Icon.Box}" Width="20" Height="20" Margin="0,0,10,0"
+                                                  Foreground="{Binding SelectedProduct, Converter={StaticResource ToneBrush}, ConverterParameter=fg}"/>
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Foreground="{Binding SelectedProduct, Converter={StaticResource ToneBrush}, ConverterParameter=fg}"
+                                                       Text="{Binding SelectedProduct.StockQuantity, StringFormat={}{0} chiếc trong kho}"/>
+                                            <TextBlock FontSize="12" Foreground="{Binding SelectedProduct, Converter={StaticResource ToneBrush}, ConverterParameter=fg}" Opacity="0.85"
+                                                       Text="{Binding SelectedProduct.MinStockLevel, StringFormat=Ngưỡng cảnh báo: {0} chiếc}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

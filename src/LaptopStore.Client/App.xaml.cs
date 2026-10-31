@@ -6,8 +6,10 @@ using LaptopStore.Infrastructure.Persistence;
 using LaptopStore.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 using System.IO;
 using System.Windows;
+using System.Windows.Markup;
 using WpfApplication = System.Windows.Application;
 
 namespace LaptopStore.Client;
@@ -55,6 +57,7 @@ public partial class App : WpfApplication
         services.AddTransient<CategoriesViewModel>();
         services.AddTransient<CustomersViewModel>();
         services.AddTransient<OrdersViewModel>();
+        services.AddTransient<PosViewModel>();
         services.AddTransient<AiAssistantViewModel>();
         services.AddSingleton<MainViewModel>();
 
@@ -64,6 +67,17 @@ public partial class App : WpfApplication
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        // Định dạng số/ngày theo tiếng Việt cho toàn bộ binding (52.990.000 đ, 31/10/2026)
+        var vi = CultureInfo.GetCultureInfo("vi-VN");
+        CultureInfo.DefaultThreadCurrentCulture = vi;
+        CultureInfo.DefaultThreadCurrentUICulture = vi;
+        Thread.CurrentThread.CurrentCulture = vi;
+        Thread.CurrentThread.CurrentUICulture = vi;
+        var viLanguage = XmlLanguage.GetLanguage(vi.IetfLanguageTag);
+        FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(viLanguage));
+        // <Run> trong TextBlock là FrameworkContentElement nên cần đặt riêng
+        FrameworkContentElement.LanguageProperty.OverrideMetadata(typeof(System.Windows.Documents.TextElement), new FrameworkPropertyMetadata(viLanguage));
+
         base.OnStartup(e);
 
         // Tự động khởi tạo Database và nạp dữ liệu mẫu Demo (Giữa kỳ: Ứng dụng -> Database)

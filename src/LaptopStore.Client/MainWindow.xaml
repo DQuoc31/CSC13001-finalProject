@@ -5,10 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:LaptopStore.Client.ViewModels"
         xmlns:views="clr-namespace:LaptopStore.Client.Views"
+        xmlns:ctl="clr-namespace:LaptopStore.Client.Controls"
         mc:Ignorable="d"
-        Title="TechGear Laptop Store - Hệ Thống Quản Lý Bán Hàng (Đồ Án UDQL2 2026 - Nhóm: 23120068, 23120069, 23210078)"
-        Height="800" Width="1280" MinWidth="1100" MinHeight="700"
-        WindowStartupLocation="CenterScreen" Background="#F1F5F9">
+        Title="TechGear Laptop Store"
+        Height="900" Width="1440" MinWidth="1180" MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Brush.Bg}"
+        FontFamily="{StaticResource Font.Text}" FontSize="13"
+        Foreground="{StaticResource Brush.Text}"
+        TextOptions.TextFormattingMode="Display">
 
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
@@ -26,137 +31,188 @@
         <DataTemplate DataType="{x:Type vm:OrdersViewModel}">
             <views:OrdersView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PosViewModel}">
+            <views:PosView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AiAssistantViewModel}">
             <views:AiAssistantView/>
         </DataTemplate>
 
-        <!-- Style cho Navigation Buttons -->
-        <Style x:Key="NavButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#334155"/>
-            <Setter Property="FontSize" Value="14"/>
+        <Style x:Key="NavLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="16,12"/>
-            <Setter Property="Margin" Value="0,2"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.SideMuted}"/>
+            <Setter Property="Margin" Value="10,16,0,8"/>
         </Style>
     </Window.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="64"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
-        </Grid.RowDefinitions>
+        <!-- ===================== Màn đăng nhập ===================== -->
+        <views:LoginView Visibility="{Binding IsLoggedIn, Converter={StaticResource Vis}, ConverterParameter=invert}"/>
 
-        <!-- 1. Thanh tiêu đề Header trên cùng -->
-        <Border Grid.Row="0" Background="#1E293B" Padding="20,0">
-            <DockPanel VerticalAlignment="Center">
-                <!-- Tên cửa hàng & MSSV -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="⚡ TECHGEAR" FontSize="20" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center"/>
-                    <TextBlock Text="LAPTOP STORE" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Margin="6,0,16,0"/>
-                    <Border Background="#334155" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
-                        <TextBlock Text="Nhóm: 23120068 - 23120069 - 23210078 | UDQL2 2026" Foreground="#94A3B8" FontSize="11"/>
-                    </Border>
-                    
-                    <!-- Nút chuyển đổi Kiến trúc: Giữa kỳ (Direct DB) <-> Cuối kỳ (API Server) -->
-                    <Button Margin="16,0,0,0" Padding="12,5" Background="#0EA5E9" Foreground="White" BorderThickness="0"
-                            FontWeight="Bold" FontSize="11" ToolTip="Bấm để chuyển đổi giữa mô hình Giữa kỳ (kết nối trực tiếp DB) và Cuối kỳ (qua Web API)"
-                            Command="{Binding ToggleConnectionModeCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔄 Kiến Trúc: "/>
-                            <TextBlock Text="{Binding ConnectionModeBadge}"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-
-                <!-- Thông tin đăng nhập & tài khoản demo nhanh -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <!-- Tài khoản demo buttons -->
-                    <TextBlock Text="Tài khoản:" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12"/>
-                    <Button Content="Admin" Margin="2,0" Padding="8,3" Background="#3B82F6" Foreground="White" BorderThickness="0" FontSize="11"
-                            Command="{Binding QuickSelectAccountCommand}" CommandParameter="admin"/>
-                    <Button Content="Manager" Margin="2,0" Padding="8,3" Background="#10B981" Foreground="White" BorderThickness="0" FontSize="11"
-                            Command="{Binding QuickSelectAccountCommand}" CommandParameter="manager"/>
-                    <Button Content="Staff" Margin="2,0" Padding="8,3" Background="#F59E0B" Foreground="White" BorderThickness="0" FontSize="11"
-                            Command="{Binding QuickSelectAccountCommand}" CommandParameter="staff"/>
-                    <Button Content="Warehouse" Margin="2,0" Padding="8,3" Background="#8B5CF6" Foreground="White" BorderThickness="0" FontSize="11"
-                            Command="{Binding QuickSelectAccountCommand}" CommandParameter="warehouse"/>
-
-                    <Button Content="🔑 Đăng Nhập" Margin="8,0,0,0" Padding="12,5" Background="#22C55E" Foreground="White" FontWeight="Bold" BorderThickness="0"
-                            Command="{Binding LoginCommand}"/>
-
-                    <!-- Thông tin user hiện tại -->
-                    <Border Background="#334155" CornerRadius="6" Padding="10,4" Margin="12,0,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="👤 " Foreground="#38BDF8"/>
-                            <TextBlock Text="{Binding UserDisplayName}" Foreground="White" FontWeight="SemiBold" FontSize="12"/>
-                            <TextBlock Text=" [" Foreground="#94A3B8" FontSize="12"/>
-                            <TextBlock Text="{Binding UserRoleName}" Foreground="#FDE047" FontWeight="Bold" FontSize="12"/>
-                            <TextBlock Text="]" Foreground="#94A3B8" FontSize="12"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </DockPanel>
-        </Border>
-
-        <!-- 2. Phần thân giao diện: Sidebar bên trái & Content bên phải -->
-        <Grid Grid.Row="1">
+        <!-- ===================== Khung ứng dụng ===================== -->
+        <Grid Visibility="{Binding IsLoggedIn, Converter={StaticResource Vis}}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="248"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Cột menu Sidebar -->
-            <Border Grid.Column="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,1,0" Padding="12,16">
-                <DockPanel>
-                    <!-- Danh mục chuyển trang -->
-                    <StackPanel DockPanel.Dock="Top">
-                        <TextBlock Text="CHỨC NĂNG CHÍNH (GIỮA KỲ &amp; CUỐI KỲ)" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="8,0,0,8"/>
+            <!-- Sidebar -->
+            <Border Grid.Column="0" Background="{StaticResource Brush.Side}" ClipToBounds="True">
+                <Grid>
+                    <Ellipse Width="260" Height="260" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-90,-100,0" IsHitTestVisible="False">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#24FFFFFF" Offset="0"/>
+                                <GradientStop Color="#00FFFFFF" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
 
-                        <Button Style="{StaticResource NavButtonStyle}" Content="💻 Quản Lý Sản Phẩm"
-                                Command="{Binding NavigateProductsCommand}"/>
-
-                        <Button Style="{StaticResource NavButtonStyle}" Content="📁 Quản Lý Danh Mục"
-                                Command="{Binding NavigateCategoriesCommand}"/>
-
-                        <Button Style="{StaticResource NavButtonStyle}" Content="👥 Quản Lý Khách Hàng"
-                                Command="{Binding NavigateCustomersCommand}"/>
-
-                        <Button Style="{StaticResource NavButtonStyle}" Content="🧾 Quản Lý Đơn Hàng"
-                                Command="{Binding NavigateOrdersCommand}"/>
-
-                        <Button Style="{StaticResource NavButtonStyle}" Content="📊 Báo Cáo &amp; Thống Kê"
-                                Command="{Binding NavigateDashboardCommand}"/>
-
-                        <Button Style="{StaticResource NavButtonStyle}" Content="🤖 Trợ Lý AI Nghiệp Vụ"
-                                Command="{Binding NavigateAiCommand}"/>
-                    </StackPanel>
-
-                    <!-- Khung thông tin hệ thống dưới góc sidebar -->
-                    <Border DockPanel.Dock="Bottom" Background="#F8FAFC" CornerRadius="8" Padding="12" BorderBrush="#E2E8F0" BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="Kiến Trúc Hoạt Động" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
-                            <TextBlock Text="{Binding ConnectionMode}" FontSize="10" Foreground="#2563EB" Margin="0,4,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
-                            <TextBlock Text="Xác thực: Salted Hash &amp; JWT Bearer RBAC" FontSize="10" Foreground="#10B981" Margin="0,4,0,0"/>
+                    <DockPanel Margin="14,8,14,14">
+                        <!-- Logo -->
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8,12,0,12">
+                            <Border Width="36" Height="36" CornerRadius="10" Background="White">
+                                <ctl:Icon Data="{StaticResource Icon.Laptop}" Width="20" Height="20" Foreground="{StaticResource Brush.Side}"/>
+                            </Border>
+                            <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="TechGear" Foreground="White" FontSize="15" FontWeight="Bold"/>
+                                <TextBlock Text="Laptop Store" Foreground="{StaticResource Brush.SideSubtle}" FontSize="11.5"/>
+                            </StackPanel>
                         </StackPanel>
-                    </Border>
-                </DockPanel>
+
+                        <!-- Chân sidebar: kiến trúc kết nối + người dùng -->
+                        <StackPanel DockPanel.Dock="Bottom">
+                            <Border Background="{StaticResource Brush.SideHover}" BorderBrush="{StaticResource Brush.SideLine}" BorderThickness="1"
+                                    CornerRadius="12" Padding="12" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,8">
+                                        <TextBlock Text="Kiến trúc kết nối" FontSize="11" Foreground="{StaticResource Brush.SideSubtle}"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Ellipse Width="7" Height="7" Fill="#4ADE80" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                            <TextBlock Text="Online" FontSize="11" Foreground="{StaticResource Brush.SideSubtle}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                    <Border Background="#38001A33" CornerRadius="8" Padding="3">
+                                        <UniformGrid Columns="2">
+                                            <RadioButton Style="{StaticResource Seg.Side}" GroupName="SideMode" Content="Direct DB"
+                                                         ctl:Ui.Icon="{StaticResource Icon.Db}" IsChecked="{Binding IsDirectMode, Mode=TwoWay}"
+                                                         ToolTip="Giữa kỳ: Ứng dụng ➔ Database Server"/>
+                                            <RadioButton Style="{StaticResource Seg.Side}" GroupName="SideMode" Content="Web API"
+                                                         ctl:Ui.Icon="{StaticResource Icon.Cloud}" IsChecked="{Binding IsApiMode, Mode=TwoWay}"
+                                                         ToolTip="Cuối kỳ: Client ➔ API Server ➔ Database (cần chạy LaptopStore.Api)"/>
+                                        </UniformGrid>
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Margin="0,9,0,0">
+                                        <TextBlock Text="App" FontSize="11" Foreground="{StaticResource Brush.SideSubtle}"/>
+                                        <ctl:Icon Data="{StaticResource Icon.Right}" Width="11" Height="11" Margin="5,0" Foreground="{StaticResource Brush.SideSubtle}"/>
+                                        <TextBlock Text="{Binding ConnectionFlow}" FontSize="11" Foreground="{StaticResource Brush.SideSubtle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <Grid Margin="4,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentControl Width="34" Height="34" Content="{Binding UserDisplayName}" ContentTemplate="{StaticResource AvatarTemplate}"/>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding UserDisplayName}" Foreground="White" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding UserRoleText}" Foreground="{StaticResource Brush.SideSubtle}" FontSize="11.5"/>
+                                </StackPanel>
+                                <Button Grid.Column="2" Style="{StaticResource Btn.Ghost}" Width="32" Height="32" Padding="0"
+                                        Foreground="{StaticResource Brush.SideSubtle}" ctl:Ui.Icon="{StaticResource Icon.Logout}"
+                                        ToolTip="Đăng xuất" Command="{Binding LogoutCommand}"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Điều hướng -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="TỔNG QUAN" Style="{StaticResource NavLabel}" Margin="10,12,0,8"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Bảng điều khiển" ctl:Ui.Icon="{StaticResource Icon.Dash}"
+                                        Command="{Binding NavigateDashboardCommand}"
+                                        Visibility="{Binding CanViewReports, Converter={StaticResource Vis}}"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=dashboard}"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Trợ lý AI" ctl:Ui.Icon="{StaticResource Icon.Spark}"
+                                        Command="{Binding NavigateAiCommand}"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=ai}"/>
+
+                                <TextBlock Text="BÁN HÀNG" Style="{StaticResource NavLabel}"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Bán hàng (POS)" ctl:Ui.Icon="{StaticResource Icon.Cart}"
+                                        Command="{Binding NavigatePosCommand}"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=pos}"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Đơn hàng" ctl:Ui.Icon="{StaticResource Icon.Receipt}" Tag="hot"
+                                        Command="{Binding NavigateOrdersCommand}" ctl:Ui.Badge="{Binding PendingOrderCount}"
+                                        ToolTip="Số đơn đang chờ xác nhận hoặc đang xử lý"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=orders}"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Khách hàng" ctl:Ui.Icon="{StaticResource Icon.Users}"
+                                        Command="{Binding NavigateCustomersCommand}" ctl:Ui.Badge="{Binding CustomerCount}"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=customers}"/>
+
+                                <TextBlock Text="KHO HÀNG" Style="{StaticResource NavLabel}"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Sản phẩm" ctl:Ui.Icon="{StaticResource Icon.Laptop}"
+                                        Command="{Binding NavigateProductsCommand}" ctl:Ui.Badge="{Binding ProductCount}"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=products}"/>
+                                <Button Style="{StaticResource Btn.Nav}" Content="Danh mục" ctl:Ui.Icon="{StaticResource Icon.Folder}"
+                                        Command="{Binding NavigateCategoriesCommand}" ctl:Ui.Badge="{Binding CategoryCount}"
+                                        ctl:Ui.IsActive="{Binding CurrentPage, Converter={StaticResource Equals}, ConverterParameter=categories}"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Grid>
             </Border>
 
-            <!-- Khung hiển thị nội dung chính -->
-            <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
-        </Grid>
+            <!-- Vùng nội dung -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="28"/>
+                </Grid.RowDefinitions>
 
-        <!-- 3. Thanh trạng thái Status Bar dưới cùng -->
-        <Border Grid.Row="2" Background="#0F172A" Padding="16,0">
-            <DockPanel VerticalAlignment="Center">
-                <TextBlock Text="{Binding StatusMessage, TargetNullValue='Hệ thống sẵn sàng.'}" Foreground="#94A3B8" FontSize="12" VerticalAlignment="Center"/>
-                <TextBlock Text="Đồ án môn UDQL2 / Lập trình Desktop 2026 - Khoa CNTT" HorizontalAlignment="Right" Foreground="#64748B" FontSize="11" VerticalAlignment="Center"/>
-            </DockPanel>
-        </Border>
+                <!-- Thanh trên cùng -->
+                <Border Grid.Row="0" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,0,0,1" Padding="28,0">
+                    <DockPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="TechGear" Foreground="{StaticResource Brush.Muted}" FontSize="12.5"/>
+                            <ctl:Icon Data="{StaticResource Icon.Right}" Width="13" Height="13" Margin="6,0" Foreground="{StaticResource Brush.Muted}"/>
+                            <TextBlock Text="{Binding PageTitle}" FontWeight="SemiBold" FontSize="12.5"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                                <ctl:Icon Data="{StaticResource Icon.Clock}" Width="14" Height="14" Foreground="{StaticResource Brush.Faint}" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding TodayText}" Foreground="{StaticResource Brush.Muted}" FontSize="12.5" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Button Style="{StaticResource Btn.Primary}" Content="Tạo đơn" ctl:Ui.Icon="{StaticResource Icon.Plus}"
+                                    Command="{Binding NavigatePosCommand}" ToolTip="Mở trang Bán hàng (POS)"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Trang hiện tại -->
+                <ContentControl Grid.Row="1" Content="{Binding CurrentView}" Margin="28,22,28,24" Focusable="False"/>
+
+                <!-- Thanh trạng thái -->
+                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource Brush.Line}" BorderThickness="0,1,0,0" Padding="20,0">
+                    <DockPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="6" Height="6" Fill="#10B981" VerticalAlignment="Center" Margin="0,0,7,0"/>
+                            <TextBlock Text="{Binding ConnectionShort, StringFormat=Đã kết nối · {0}}" FontSize="11.5" Foreground="{StaticResource Brush.Muted}"/>
+                            <TextBlock Text="{Binding CurrentView.StatusMessage}" FontSize="11.5" Foreground="{StaticResource Brush.Muted}" Margin="18,0,0,0"
+                                       TextTrimming="CharacterEllipsis" MaxWidth="640"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock FontSize="11.5" Foreground="{StaticResource Brush.Muted}">
+                                <Run Text="{Binding CurrentUser.Username, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding UserRoleText, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Text="UDQL2 2026" FontSize="11.5" Foreground="{StaticResource Brush.Faint}" Margin="18,0,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

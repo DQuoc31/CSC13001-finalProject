@@ -1,0 +1,72 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Font -->
+    <FontFamily x:Key="Font.Text">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <FontFamily x:Key="Font.Mono">Cascadia Mono, Consolas</FontFamily>
+
+    <!-- Nền & bề mặt -->
+    <SolidColorBrush x:Key="Brush.Bg" Color="#F4F6FA"/>
+    <SolidColorBrush x:Key="Brush.Surface" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Brush.Surface2" Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="Brush.Line" Color="#E6EAF0"/>
+    <SolidColorBrush x:Key="Brush.Line2" Color="#EEF1F5"/>
+    <SolidColorBrush x:Key="Brush.Hover" Color="#F3F6FA"/>
+
+    <!-- Chữ -->
+    <SolidColorBrush x:Key="Brush.Text" Color="#0F172A"/>
+    <SolidColorBrush x:Key="Brush.Text2" Color="#334155"/>
+    <SolidColorBrush x:Key="Brush.Muted" Color="#64748B"/>
+    <SolidColorBrush x:Key="Brush.Faint" Color="#94A3B8"/>
+
+    <!-- Sidebar -->
+    <SolidColorBrush x:Key="Brush.Side" Color="#0054A6"/>
+    <SolidColorBrush x:Key="Brush.SideDark" Color="#00427F"/>
+    <SolidColorBrush x:Key="Brush.SideHover" Color="#1FFFFFFF"/>
+    <SolidColorBrush x:Key="Brush.SideLine" Color="#2EFFFFFF"/>
+    <SolidColorBrush x:Key="Brush.SideText" Color="#DBEAFE"/>
+    <SolidColorBrush x:Key="Brush.SideMuted" Color="#99DBEAFE"/>
+    <SolidColorBrush x:Key="Brush.SideSubtle" Color="#BFDBFE"/>
+
+    <!-- Màu nhấn -->
+    <Color x:Key="Color.Accent">#2563EB</Color>
+    <SolidColorBrush x:Key="Brush.Accent" Color="#2563EB"/>
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="#1D4ED8"/>
+    <SolidColorBrush x:Key="Brush.AccentSoft" Color="#EFF6FF"/>
+    <SolidColorBrush x:Key="Brush.AccentSoft2" Color="#DBEAFE"/>
+    <SolidColorBrush x:Key="Brush.AccentInk" Color="#1E40AF"/>
+    <SolidColorBrush x:Key="Brush.FocusRing" Color="#93C5FD"/>
+    <LinearGradientBrush x:Key="Brush.AccentGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#3B82F6" Offset="0"/>
+        <GradientStop Color="#2563EB" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Trạng thái -->
+    <SolidColorBrush x:Key="Brush.Ok" Color="#059669"/>
+    <SolidColorBrush x:Key="Brush.OkInk" Color="#047857"/>
+    <SolidColorBrush x:Key="Brush.OkSoft" Color="#E7F8F1"/>
+    <SolidColorBrush x:Key="Brush.Warn" Color="#D97706"/>
+    <SolidColorBrush x:Key="Brush.WarnInk" Color="#B45309"/>
+    <SolidColorBrush x:Key="Brush.WarnSoft" Color="#FEF4E2"/>
+    <SolidColorBrush x:Key="Brush.Bad" Color="#DC2626"/>
+    <SolidColorBrush x:Key="Brush.BadInk" Color="#B91C1C"/>
+    <SolidColorBrush x:Key="Brush.BadSoft" Color="#FDECEC"/>
+    <SolidColorBrush x:Key="Brush.Info" Color="#0284C7"/>
+    <SolidColorBrush x:Key="Brush.InfoInk" Color="#0369A1"/>
+    <SolidColorBrush x:Key="Brush.InfoSoft" Color="#E6F4FC"/>
+    <SolidColorBrush x:Key="Brush.Violet" Color="#7C3AED"/>
+    <SolidColorBrush x:Key="Brush.VioletInk" Color="#6D28D9"/>
+    <SolidColorBrush x:Key="Brush.VioletSoft" Color="#F1EBFE"/>
+    <SolidColorBrush x:Key="Brush.MuteInk" Color="#475569"/>
+    <SolidColorBrush x:Key="Brush.MuteSoft" Color="#EEF2F6"/>
+
+    <!-- Đổ bóng -->
+    <DropShadowEffect x:Key="Shadow.Card" BlurRadius="6" ShadowDepth="1" Direction="270" Opacity="0.06" Color="#0F172A"/>
+    <DropShadowEffect x:Key="Shadow.Raised" BlurRadius="18" ShadowDepth="3" Direction="270" Opacity="0.10" Color="#0F172A"/>
+    <DropShadowEffect x:Key="Shadow.Accent" BlurRadius="14" ShadowDepth="3" Direction="270" Opacity="0.30" Color="#2563EB"/>
+
+    <CornerRadius x:Key="Radius.Sm">8</CornerRadius>
+    <CornerRadius x:Key="Radius">10</CornerRadius>
+    <CornerRadius x:Key="Radius.Lg">14</CornerRadius>
+</ResourceDictionary>

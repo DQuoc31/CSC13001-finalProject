@@ -41,6 +41,9 @@ public class CustomersViewModel : ViewModelBase
     }
 
     public ObservableCollection<CustomerDto> Customers { get; } = new();
+
+    /// <summary>Tổng chi tiêu của các khách hàng đang hiển thị.</summary>
+    public decimal TotalSpentSum => Customers.Sum(c => c.TotalSpent);
     public ObservableCollection<OrderDto> SelectedCustomerOrders { get; } = new();
 
     public IAsyncRelayCommand LoadCommand { get; }
@@ -69,6 +72,7 @@ public class CustomersViewModel : ViewModelBase
             {
                 Customers.Add(c);
             }
+            OnPropertyChanged(nameof(TotalSpentSum));
             StatusMessage = $"Đã tải {Customers.Count} khách hàng.";
         }
         catch (Exception ex)
@@ -110,8 +114,8 @@ public class CustomersViewModel : ViewModelBase
             StatusMessage = "Đang thêm khách hàng mới...";
             try
             {
-                var ok = await _apiClient.CreateCustomerAsync(dialog.ResultCreateDto);
-                if (ok)
+                var result = await _apiClient.CreateCustomerAsync(dialog.ResultCreateDto);
+                if (result.IsSuccess)
                 {
                     StatusMessage = $"Đã thêm khách hàng: {dialog.ResultCreateDto.FullName}";
                     MessageBox.Show("Thêm mới thông tin khách hàng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -119,8 +123,8 @@ public class CustomersViewModel : ViewModelBase
                 }
                 else
                 {
-                    StatusMessage = "Thêm khách hàng thất bại. Số điện thoại có thể đã tồn tại.";
-                    MessageBox.Show("Không thể thêm khách hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusMessage = result.Error ?? "Thêm khách hàng thất bại. Số điện thoại có thể đã tồn tại.";
+                    MessageBox.Show(result.Error ?? "Không thể thêm khách hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -147,8 +151,8 @@ public class CustomersViewModel : ViewModelBase
             StatusMessage = $"Đang cập nhật khách hàng: {SelectedCustomer.FullName}...";
             try
             {
-                var ok = await _apiClient.UpdateCustomerAsync(dialog.ResultUpdateDto);
-                if (ok)
+                var result = await _apiClient.UpdateCustomerAsync(dialog.ResultUpdateDto);
+                if (result.IsSuccess)
                 {
                     StatusMessage = $"Đã cập nhật khách hàng: {dialog.ResultUpdateDto.FullName}";
                     MessageBox.Show("Cập nhật thông tin khách hàng thành công!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -156,8 +160,8 @@ public class CustomersViewModel : ViewModelBase
                 }
                 else
                 {
-                    StatusMessage = "Cập nhật khách hàng thất bại.";
-                    MessageBox.Show("Không thể cập nhật khách hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StatusMessage = result.Error ?? "Cập nhật khách hàng thất bại.";
+                    MessageBox.Show(result.Error ?? "Không thể cập nhật khách hàng.", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -187,8 +191,8 @@ public class CustomersViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            var ok = await _apiClient.DeleteCustomerAsync(SelectedCustomer.Id);
-            if (ok)
+            var result = await _apiClient.DeleteCustomerAsync(SelectedCustomer.Id);
+            if (result.IsSuccess)
             {
                 Customers.Remove(SelectedCustomer);
                 SelectedCustomer = null;
@@ -198,8 +202,8 @@ public class CustomersViewModel : ViewModelBase
             }
             else
             {
-                StatusMessage = "Xóa khách hàng thất bại. Khách hàng đã có đơn hàng giao dịch.";
-                MessageBox.Show("Không thể xóa khách hàng đã có đơn hàng giao dịch trong hệ thống.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = result.Error ?? "Xóa khách hàng thất bại. Khách hàng đã có đơn hàng giao dịch.";
+                MessageBox.Show(result.Error ?? "Không thể xóa khách hàng đã có đơn hàng giao dịch trong hệ thống.", "Cảnh báo", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)

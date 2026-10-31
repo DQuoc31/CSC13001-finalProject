@@ -21,7 +21,11 @@ public class AiAssistantViewModel : ViewModelBase
     public string UserPrompt
     {
         get => _userPrompt;
-        set => SetProperty(ref _userPrompt, value);
+        set
+        {
+            if (SetProperty(ref _userPrompt, value))
+                SendMessageCommand.NotifyCanExecuteChanged();
+        }
     }
 
     public ObservableCollection<ChatMessageItem> Messages { get; } = new();
@@ -43,6 +47,15 @@ public class AiAssistantViewModel : ViewModelBase
             IsAi = true
         });
     }
+
+    /// <summary>Tên dễ hiểu của các tool nghiệp vụ mà AI đã gọi.</summary>
+    private static string DescribeTool(string toolName) => toolName switch
+    {
+        "get_sales_report" => "Báo cáo doanh thu",
+        "get_low_stock_products" => "Sản phẩm sắp hết hàng",
+        "search_products_by_requirement" => "Tìm sản phẩm phù hợp",
+        _ => toolName
+    };
 
     private void ExecuteQuickPrompt(string? prompt)
     {
@@ -74,7 +87,7 @@ public class AiAssistantViewModel : ViewModelBase
             if (result != null)
             {
                 string? tools = result.ExecutedTools.Count > 0
-                    ? $"[Đã thực thi tool: {string.Join(", ", result.ExecutedTools.Select(t => t.ToolName))}]"
+                    ? "Đã tra cứu dữ liệu: " + string.Join(", ", result.ExecutedTools.Select(t => DescribeTool(t.ToolName)).Distinct())
                     : null;
 
                 Messages.Add(new ChatMessageItem
