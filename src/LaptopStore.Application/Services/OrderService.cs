@@ -186,6 +186,13 @@ public class OrderService : IOrderService
         if (order.Status == OrderStatus.Completed && dto.Status != OrderStatus.Completed)
             return Result.Failure("Đơn hàng đã hoàn thành không thể đổi trạng thái.");
 
+        if (order.Status == OrderStatus.Cancelled)
+            return Result.Failure("Đơn hàng đã bị hủy, không thể đổi trạng thái.");
+
+        // Hủy đơn phải đi qua CancelOrderAsync để hoàn kho và trừ lại điểm thưởng
+        if (dto.Status == OrderStatus.Cancelled)
+            return Result.Failure("Vui lòng dùng chức năng Hủy đơn hàng để hủy đơn.");
+
         order.Status = dto.Status;
         if (dto.PaymentStatus.HasValue)
         {
@@ -215,6 +222,7 @@ public class OrderService : IOrderService
     {
         var order = await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Customer)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.IsActive);
 
         if (order == null)
@@ -231,6 +239,14 @@ public class OrderService : IOrderService
             ? $"Lý do hủy: {reason}"
             : $"{order.InternalNote} | Lý do hủy: {reason}";
         order.UpdatedAt = DateTime.UtcNow;
+
+        // Trừ lại tổng chi tiêu và điểm thưởng đã cộng khi lập đơn
+        if (order.Customer != null)
+        {
+            order.Customer.TotalSpent = Math.Max(0, order.Customer.TotalSpent - order.FinalAmount);
+            order.Customer.RewardPoints = Math.Max(0, order.Customer.RewardPoints - (int)(order.FinalAmount / 100000));
+            order.Customer.UpdatedAt = DateTime.UtcNow;
+        }
 
         // Hoàn lại số lượng tồn kho cho các sản phẩm trong đơn
         foreach (var item in order.OrderItems)
